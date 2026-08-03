@@ -68,6 +68,7 @@ export function createCase(hostProfile: { id: string; name: string; avatar: stri
     jokerVotedOut: false,
     jokerTargetKillerGuess: null,
     confirmedClues: [],
+    clueCycleStartTime: null,
     meDraftClues: {},
     meChangedClueCount: 0,
     votes: {},
@@ -214,6 +215,14 @@ export function kickPlayer(code: string, hostId: string, targetPlayerId: string)
   return c;
 }
 
+export function getClueCycleDuration(settings: CaseSettings): number {
+  if (settings.clueReleaseSpeed === 'fast') return 30;
+  if (settings.clueReleaseSpeed === 'normal') return 60;
+  if (settings.clueReleaseSpeed === 'slow') return 120;
+  if (settings.clueReleaseSpeed === 'custom') return settings.customClueTimeSeconds || 45;
+  return 60;
+}
+
 export function startMatch(code: string, hostId: string): CaseState {
   const c = getCase(code);
   if (!c) throw new Error('القضية غير موجودة');
@@ -229,6 +238,7 @@ export function startMatch(code: string, hostId: string): CaseState {
   c.selectedWeapon = null;
   c.selectedEvidence = null;
   c.confirmedClues = [];
+  c.clueCycleStartTime = null;
   c.meDraftClues = {};
   c.meChangedClueCount = 0;
   c.votes = {};
@@ -314,6 +324,59 @@ export function startMatch(code: string, hostId: string): CaseState {
   return c;
 }
 
+export function finishRoleReveal(code: string): CaseState {
+  const c = getCase(code);
+  if (!c) throw new Error('القضية غير موجودة');
+  if (c.phase === 'ROLE_REVEAL') {
+    c.phase = 'KILLER_SELECTION';
+    c.log.push(`انتهت مرحلة كشف الأدوار. يدخل القاتل الآن مرحلة اختيار سلاح الجريمة والدليل.`);
+  }
+  return c;
+}
+
+function determineCauseOfDeath(weaponName: string, tags: string[] = []): string {
+  const text = (weaponName + ' ' + tags.join(' ')).toLowerCase();
+  if (text.includes('سم') || text.includes('دواء') || text.includes('poison') || text.includes('vial') || text.includes('جرعة') || text.includes('كيميائي') || text.includes('حقنة')) {
+    return 'تسمم'; // Poisoning
+  }
+  if (text.includes('حبل') || text.includes('سلك') || text.includes('خنق') || text.includes('rope') || text.includes('strangle') || text.includes('شال') || text.includes('رباط')) {
+    return 'خنق'; // Strangulation
+  }
+  if (text.includes('سكين') || text.includes('سيف') || text.includes('خنجر') || text.includes('مقص') || text.includes('شفرة') || text.includes('knife') || text.includes('blade') || text.includes('طعن') || text.includes('منشار')) {
+    return 'طعن'; // Stabbing
+  }
+  if (text.includes('مسدس') || text.includes('بندقية') || text.includes('رصاص') || text.includes('سلاح ناري') || text.includes('gun') || text.includes('pistol') || text.includes('إطلاق') || text.includes('قناص')) {
+    return 'إطلاق نار'; // Shooting
+  }
+  if (text.includes('نار') || text.includes('شمعة') || text.includes('حرق') || text.includes('زيت') || text.includes('fire') || text.includes('burn') || text.includes('ولاعة')) {
+    return 'حرق'; // Burning
+  }
+  if (text.includes('ماء') || text.includes('سائل') || text.includes('غرق') || text.includes('دلو') || text.includes('water') || text.includes('drown') || text.includes('مسبح')) {
+    return 'غرق'; // Drowning
+  }
+  return 'صدمة قوة حادة'; // Blunt Force Trauma
+}
+
+function determineCrimeSceneLocation(weaponName: string, tags: string[] = []): string {
+  const text = (weaponName + ' ' + tags.join(' ')).toLowerCase();
+  if (text.includes('غابة') || text.includes('حديقة') || text.includes('شارع') || text.includes('شاطئ') || text.includes('خارجي') || text.includes('سيارة')) {
+    return 'خارجي';
+  }
+  if (text.includes('مستشفى') || text.includes('حقنة') || text.includes('دواء')) {
+    return 'مستشفى';
+  }
+  if (text.includes('مدرسة') || text.includes('قلم') || text.includes('كتاب')) {
+    return 'مدرسة';
+  }
+  if (text.includes('مطرقة') || text.includes('خشب') || text.includes('بناء') || text.includes('منشار')) {
+    return 'موقع بناء';
+  }
+  if (text.includes('منزل') || text.includes('مطبخ') || text.includes('وسادة')) {
+    return 'منزل';
+  }
+  return 'داخلي';
+}
+
 export function killerSelectCards(code: string, killerId: string, weaponId: string, evidenceId: string): CaseState {
   const c = getCase(code);
   if (!c) throw new Error('القضية غير موجودة');
@@ -332,8 +395,19 @@ export function killerSelectCards(code: string, killerId: string, weaponId: stri
   c.selectedWeapon = chosenW;
   c.selectedEvidence = chosenE;
   c.phase = 'INVESTIGATION';
+  const now = Date.now();
+  c.clueCycleStartTime = now;
+
+  const locClue = determineCrimeSceneLocation(chosenW.name, chosenW.tags);
+  const codClue = determineCauseOfDeath(chosenW.name, chosenW.tags);
+
+  c.confirmedClues = [
+    { folderIndex: 0, folderName: INVESTIGATION_FOLDERS[0].name, clueTag: locClue, confirmedAt: now },
+    { folderIndex: 1, folderName: INVESTIGATION_FOLDERS[1].name, clueTag: codClue, confirmedAt: now },
+  ];
 
   c.log.push(`قام القاتل بسريّة باختيار سلاح الجريمة والدليل.`);
+  c.log.push(`تم كشف الدليلين الدائمين تلقائياً: موقع الجريمة (${locClue}) وسبب الوفاة (${codClue}).`);
   return c;
 }
 
@@ -350,6 +424,18 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
   const c = getCase(code);
   if (!c) throw new Error('القضية غير موجودة');
   if (c.medicalExaminerId !== meId) throw new Error('يمكن للطبيب الشرعي فقط تأكيد الأدلة');
+
+  if (folderIndex === 0 || folderIndex === 1) {
+    throw new Error('الدليلان الأول والثاني دائمين ومكشوفين من بداية القضية');
+  }
+
+  const now = Date.now();
+  const duration = getClueCycleDuration(c.settings);
+  const elapsedSeconds = c.clueCycleStartTime ? Math.floor((now - c.clueCycleStartTime) / 1000) : duration;
+  if (c.clueCycleStartTime && elapsedSeconds < duration - 2) {
+    const remaining = Math.max(1, duration - elapsedSeconds);
+    throw new Error(`لا يمكنك كشف الدليل حتى ينتهي مؤقت الأدلة (متبقي ${remaining} ثانية)`);
+  }
 
   const draftTag = c.meDraftClues[folderIndex];
   if (!draftTag) throw new Error('لم يتم تحديد دليل في المجلد');
@@ -380,6 +466,9 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
     });
     c.log.push(`قام الطبيب الشرعي بإصدار دليل مجلد التحقيق #${folderIndex + 1}: "${draftTag}".`);
   }
+
+  // Restart timer immediately for the next clue cycle
+  c.clueCycleStartTime = Date.now();
 
   return c;
 }
@@ -592,6 +681,7 @@ export function getClientState(caseCode: string, playerId: string): any {
     myEvidence: mePlayer?.evidence || [],
     intel,
     confirmedClues: c.confirmedClues,
+    clueCycleStartTime: c.clueCycleStartTime,
     meDraftClues: myRole === 'MEDICAL_EXAMINER' ? c.meDraftClues : undefined,
     meChangedClueCount: myRole === 'MEDICAL_EXAMINER' ? c.meChangedClueCount : undefined,
     latestVoteResult: c.latestVoteResult,

@@ -310,22 +310,47 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
             <span className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-sky-400" /> سرعة كشف الأدلة
             </span>
-            <div className="grid grid-cols-3 gap-2">
-              {(['fast', 'normal', 'slow'] as const).map((speed) => (
+            <div className="grid grid-cols-4 gap-1.5">
+              {(['fast', 'normal', 'slow', 'custom'] as const).map((speed) => (
                 <button
                   key={speed}
                   disabled={!isHost}
                   onClick={() => onUpdateSettings({ clueReleaseSpeed: speed })}
-                  className={`py-1 rounded-lg text-[11px] font-semibold uppercase font-mono transition-colors ${
+                  className={`py-1.5 rounded-lg text-[10px] font-semibold uppercase font-mono transition-colors ${
                     state.settings.clueReleaseSpeed === speed
                       ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
                       : 'bg-zinc-900 text-zinc-500 border border-zinc-800'
                   }`}
                 >
-                  {speed === 'fast' ? 'سريع (30ث)' : speed === 'normal' ? 'عادي (1د)' : 'بطيء (2د)'}
+                  {speed === 'fast'
+                    ? 'سريع (30ث)'
+                    : speed === 'normal'
+                    ? 'عادي (60ث)'
+                    : speed === 'slow'
+                    ? 'بطيء (120ث)'
+                    : 'مخصص'}
                 </button>
               ))}
             </div>
+
+            {state.settings.clueReleaseSpeed === 'custom' && (
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-[11px] text-zinc-400 font-serif">الوقت المخصص (بالثواني):</span>
+                <input
+                  type="number"
+                  min={10}
+                  max={600}
+                  disabled={!isHost}
+                  value={state.settings.customClueTimeSeconds || 45}
+                  onChange={(e) =>
+                    onUpdateSettings({
+                      customClueTimeSeconds: Math.max(10, parseInt(e.target.value) || 45),
+                    })
+                  }
+                  className="w-20 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-sky-300 font-mono focus:border-sky-500 focus:outline-none text-center"
+                />
+              </div>
+            )}
           </div>
 
           {/* Max Players */}

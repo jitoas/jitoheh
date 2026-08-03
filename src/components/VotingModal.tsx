@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ClientGameState, Card } from '../types';
+import { ClientGameState } from '../types';
 import { CardArt } from './CardArt';
 import { Vote, Check, X } from 'lucide-react';
 
@@ -31,8 +31,9 @@ export const VotingModal: React.FC<VotingModalProps> = ({
   const canSubmit = targetId && selectedWeaponId && selectedEvidenceId;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/90 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto scrollbar-thin">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 overflow-y-auto dir-rtl">
+      <div className="w-full max-w-4xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/90 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto scrollbar-thin text-right">
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400">
@@ -40,10 +41,10 @@ export const VotingModal: React.FC<VotingModalProps> = ({
             </div>
             <div>
               <span className="text-[10px] text-red-400 font-mono font-bold uppercase tracking-wider block">
-                FILE FORMAL ACCUSATION
+                تقديم لائحة الاتهام الرسمية
               </span>
               <h3 className="text-2xl font-extrabold text-zinc-100 font-serif">
-                Cast Crime Solution Vote
+                التصويت لحل لغز الجريمة
               </h3>
             </div>
           </div>
@@ -59,7 +60,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
         {/* Step 1: Select Suspected Killer */}
         <div>
           <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
-            1. Select Suspected Killer
+            1. اختر المشتبه به الرئيس (القاتل)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {eligibleTargets.map((p) => {
@@ -72,7 +73,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
                     setSelectedWeaponId(null);
                     setSelectedEvidenceId(null);
                   }}
-                  className={`p-3 rounded-xl border transition-all text-left flex items-center gap-2.5 ${
+                  className={`p-3 rounded-xl border transition-all text-right flex items-center gap-2.5 ${
                     isSelected
                       ? 'border-red-500 bg-red-500/20 ring-2 ring-red-500/40'
                       : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
@@ -92,7 +93,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
         {targetPlayer && (
           <div>
             <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span>2. Select Accused Weapon (from {targetPlayer.name}'s inventory)</span>
+              <span>2. اختر سلاح الجريمة المتهم (من مخزون {targetPlayer.name})</span>
               {selectedWeaponId && <Check className="w-4 h-4 text-emerald-400" />}
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
@@ -118,7 +119,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
         {targetPlayer && (
           <div>
             <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span>3. Select Accused Evidence (from {targetPlayer.name}'s inventory)</span>
+              <span>3. اختر دليل مسرح الجريمة المتهم (من مخزون {targetPlayer.name})</span>
               {selectedEvidenceId && <Check className="w-4 h-4 text-emerald-400" />}
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
@@ -140,13 +141,13 @@ export const VotingModal: React.FC<VotingModalProps> = ({
           </div>
         )}
 
-        {/* Action Button */}
-        <div className="pt-4 border-t border-zinc-800 flex justify-end gap-3">
+        {/* Action Buttons */}
+        <div className="pt-4 border-t border-zinc-800 flex items-center justify-between gap-3">
           <button
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200"
           >
-            Cancel
+            إلغاء
           </button>
 
           <button
@@ -163,10 +164,11 @@ export const VotingModal: React.FC<VotingModalProps> = ({
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-800'
             }`}
           >
-            Submit Formal Accusation Vote
+            تأكيد الاتهام وإرسال التصويت
           </button>
         </div>
       </div>
     </div>
   );
 };
+

@@ -6,7 +6,7 @@ export type Role =
   | 'MEDICAL_EXAMINER'
   | 'JOKER';
 
-export type ClueSpeed = 'fast' | 'normal' | 'slow';
+export type ClueSpeed = 'fast' | 'normal' | 'slow' | 'custom';
 export type MeMode = 'random' | 'host_chooses';
 
 export interface Card {
@@ -44,6 +44,7 @@ export interface CaseSettings {
   medicalExaminerMode: MeMode;
   medicalExaminerPlayerId: string | null;
   clueReleaseSpeed: ClueSpeed;
+  customClueTimeSeconds?: number;
   maxPlayers: 6 | 8 | 10 | 12;
 }
 
@@ -105,6 +106,7 @@ export interface CaseState {
   jokerVotedOut: boolean;
   jokerTargetKillerGuess: string | null;
   confirmedClues: ConfirmedClue[];
+  clueCycleStartTime: number | null;
   meDraftClues: Record<number, string>; // folderIndex -> clueTag
   meChangedClueCount: number; // Max 1 change allowed
   votes: Record<string, VoteData>;
@@ -147,6 +149,7 @@ export interface ClientGameState {
     medicalExaminerPlayer?: { id: string; name: string; avatar: string };
   };
   confirmedClues: ConfirmedClue[];
+  clueCycleStartTime: number | null;
   meDraftClues?: Record<number, string>; // only for ME
   meChangedClueCount?: number;
   latestVoteResult: VoteResult | null;

@@ -9,6 +9,7 @@ import {
   updatePlayerProfile,
   kickPlayer,
   startMatch,
+  finishRoleReveal,
   killerSelectCards,
   meSelectDraftClue,
   meConfirmClue,
@@ -96,6 +97,15 @@ export function setupSocketHandlers(io: Server) {
     socket.on('start_match', ({ caseCode, hostId }) => {
       try {
         startMatch(caseCode, hostId);
+        broadcastCaseState(caseCode);
+      } catch (err: any) {
+        socket.emit('error_message', err.message);
+      }
+    });
+
+    socket.on('finish_role_reveal', ({ caseCode }) => {
+      try {
+        finishRoleReveal(caseCode);
         broadcastCaseState(caseCode);
       } catch (err: any) {
         socket.emit('error_message', err.message);

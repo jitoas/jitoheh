@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { VoteResult } from '../types';
-import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
+import { CheckCircle, XCircle, ShieldAlert, Award, FileQuestion, Stamp } from 'lucide-react';
+import { sfx } from '../utils/audioSynth';
 
 interface VoteResultAnimationProps {
   result: VoteResult | null;
@@ -8,89 +9,157 @@ interface VoteResultAnimationProps {
 }
 
 export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result, onDismiss }) => {
+  const [stampPhase, setStampPhase] = useState<'entering' | 'slammed' | 'fading'>('entering');
+  const [screenShake, setScreenShake] = useState(false);
+
   useEffect(() => {
     if (result) {
-      const timer = setTimeout(() => {
+      setStampPhase('entering');
+      // Trigger camera zoom, slam stamp sound and screen shake after 350ms
+      const slamTimer = setTimeout(() => {
+        setStampPhase('slammed');
+        setScreenShake(true);
+        sfx.playStampSlam();
+
+        if (result.isFullyCorrect) {
+          setTimeout(() => sfx.playCorrectChime(), 250);
+        } else {
+          setTimeout(() => sfx.playWrongBuzz(), 250);
+        }
+
+        setTimeout(() => setScreenShake(false), 350);
+      }, 350);
+
+      // Start smooth fade out before dismiss
+      const fadeTimer = setTimeout(() => {
+        setStampPhase('fading');
+      }, 3800);
+
+      const dismissTimer = setTimeout(() => {
         onDismiss();
-      }, 2800);
-      return () => clearTimeout(timer);
+      }, 4400);
+
+      return () => {
+        clearTimeout(slamTimer);
+        clearTimeout(fadeTimer);
+        clearTimeout(dismissTimer);
+      };
     }
   }, [result, onDismiss]);
 
   if (!result) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-xl rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black p-8 text-center shadow-2xl relative overflow-hidden space-y-6">
-        {/* Top Header: Who Voted for Whom */}
-        <div className="space-y-1">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4 transition-all duration-500 dir-rtl ${
+        stampPhase === 'fading' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+      } ${screenShake ? 'translate-x-2 translate-y-2' : ''}`}
+    >
+      <div
+        className={`w-full max-w-2xl rounded-3xl border-2 border-zinc-800 bg-gradient-to-b from-zinc-950 via-zinc-900 to-black p-8 text-center shadow-2xl relative overflow-hidden space-y-6 text-right transition-transform duration-700 ${
+          stampPhase === 'slammed' ? 'scale-105' : 'scale-100'
+        }`}
+      >
+        {/* Background dossier grid watermark */}
+        <div className="absolute inset-0 bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
+
+        {/* Vintage Top Dossier Stamp Header */}
+        <div className="relative z-10 space-y-2 border-b border-zinc-800 pb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider">
-            <ShieldAlert className="w-4 h-4" /> VOTE RESULT VERIFICATION
+            <ShieldAlert className="w-4 h-4" /> نتيجة فحص وتوثيق الاتهام الجنائي
           </div>
 
-          <h3 className="text-xl md:text-2xl font-extrabold text-zinc-100 font-serif pt-2">
-            <span className="text-amber-400">{result.voterName}</span> Accused{' '}
+          <h3 className="text-xl md:text-2xl font-extrabold text-zinc-100 font-serif pt-1">
+            المحقق <span className="text-amber-400">{result.voterName}</span> اتهم المشتبه به{' '}
             <span className="text-red-400">{result.targetPlayerName}</span>
           </h3>
         </div>
 
-        {/* Center Validation Stamps */}
-        <div className="grid grid-cols-2 gap-4 my-4">
+        {/* Detailed Cards Validation with Camera Focus Zoom */}
+        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
           {/* Weapon Card Check */}
-          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/60 shadow-xl flex flex-col items-center justify-between space-y-3">
-            <span className="text-[10px] text-zinc-500 font-mono uppercase">ACCUSED WEAPON</span>
-            <span className="text-sm font-bold text-zinc-100">{result.weaponName}</span>
+          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/90 shadow-2xl flex flex-col items-center justify-between space-y-4 overflow-hidden min-h-[160px]">
+            <span className="text-xs text-zinc-400 font-mono font-bold uppercase tracking-widest">
+              سلاح الجريمة المتهم
+            </span>
+            <span className="text-lg font-extrabold text-zinc-100 font-serif">{result.weaponName}</span>
 
-            {/* Cinematic Stamp */}
-            <div className="animate-in zoom-in-50 duration-500">
+            {/* Cinematic Slamming Rubber Stamp */}
+            <div
+              className={`transition-all duration-200 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
+                stampPhase === 'entering'
+                  ? 'scale-[4.5] opacity-0 rotate-[-25deg]'
+                  : 'scale-100 opacity-100 rotate-[-6deg]'
+              }`}
+            >
               {result.isWeaponCorrect ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 font-extrabold text-xs uppercase tracking-widest rotate-[-4deg] shadow-lg shadow-emerald-500/20">
-                  <CheckCircle className="w-4 h-4" /> CORRECT
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/20 border-4 border-emerald-500 text-emerald-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-emerald-500/40">
+                  <CheckCircle className="w-6 h-6" /> CORRECT • صحيح
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-500/20 border-2 border-red-500 text-red-400 font-extrabold text-xs uppercase tracking-widest rotate-[-4deg] shadow-lg shadow-red-500/20">
-                  <XCircle className="w-4 h-4" /> WRONG
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border-4 border-red-500 text-red-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-red-500/40">
+                  <XCircle className="w-6 h-6" /> WRONG • خاطئ
                 </div>
               )}
             </div>
           </div>
 
           {/* Evidence Card Check */}
-          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/60 shadow-xl flex flex-col items-center justify-between space-y-3">
-            <span className="text-[10px] text-zinc-500 font-mono uppercase">ACCUSED EVIDENCE</span>
-            <span className="text-sm font-bold text-zinc-100">{result.evidenceName}</span>
+          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/90 shadow-2xl flex flex-col items-center justify-between space-y-4 overflow-hidden min-h-[160px]">
+            <span className="text-xs text-zinc-400 font-mono font-bold uppercase tracking-widest">
+              دليل مسرح الجريمة المتهم
+            </span>
+            <span className="text-lg font-extrabold text-zinc-100 font-serif">{result.evidenceName}</span>
 
-            {/* Cinematic Stamp */}
-            <div className="animate-in zoom-in-50 duration-500 delay-200">
+            {/* Cinematic Slamming Rubber Stamp */}
+            <div
+              className={`transition-all duration-200 delay-150 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
+                stampPhase === 'entering'
+                  ? 'scale-[4.5] opacity-0 rotate-[25deg]'
+                  : 'scale-100 opacity-100 rotate-[6deg]'
+              }`}
+            >
               {result.isEvidenceCorrect ? (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 font-extrabold text-xs uppercase tracking-widest rotate-[4deg] shadow-lg shadow-emerald-500/20">
-                  <CheckCircle className="w-4 h-4" /> CORRECT
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/20 border-4 border-emerald-500 text-emerald-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-emerald-500/40">
+                  <CheckCircle className="w-6 h-6" /> CORRECT • صحيح
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-500/20 border-2 border-red-500 text-red-400 font-extrabold text-xs uppercase tracking-widest rotate-[4deg] shadow-lg shadow-red-500/20">
-                  <XCircle className="w-4 h-4" /> WRONG
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border-4 border-red-500 text-red-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-red-500/40">
+                  <XCircle className="w-6 h-6" /> WRONG • خاطئ
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Suspected Killer Overall Stamp */}
-        <div className="pt-2 border-t border-zinc-800">
-          <span className="text-xs text-zinc-400 font-mono block mb-2">
-            Suspected Killer Identity:
+        {/* Overall Suspect Identity Verification Stamp */}
+        <div className="relative z-10 pt-4 border-t border-zinc-800 flex flex-col items-center justify-center space-y-2">
+          <span className="text-xs text-zinc-400 font-mono uppercase">
+            هوية المشتبه به الرئيس (القاتل):
           </span>
           {result.isKillerCorrect ? (
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              ✓ Killer Identity Matched!
-            </span>
+            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+              <Award className="w-4 h-4 text-emerald-400" /> تم تطابق هوية القاتل بنجاح!
+            </div>
           ) : (
-            <span className="text-xs font-bold text-red-400 uppercase tracking-wider">
-              ✗ Wrong Suspect Accused
-            </span>
+            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-xs uppercase tracking-wider">
+              <FileQuestion className="w-4 h-4 text-red-400" /> تم اتهام شخص بريء!
+            </div>
           )}
+        </div>
+
+        {/* Close Button */}
+        <div className="relative z-10 pt-2">
+          <button
+            onClick={onDismiss}
+            className="px-8 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer"
+          >
+            إغلاق شاشة التوثيق
+          </button>
         </div>
       </div>
     </div>
   );
 };
+
+

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ClientGameState, Card } from '../types';
 import { INVESTIGATION_FOLDERS, getClueMatchesCount } from '../data/clues';
-import { Folder, FolderOpen, CheckCircle, AlertCircle, Sparkles, Send, RefreshCw } from 'lucide-react';
+import { Folder, FolderOpen, CheckCircle, Lock, Unlock, Clock, Send, AlertCircle } from 'lucide-react';
 
 interface MedicalExaminerInterfaceProps {
   state: ClientGameState;
@@ -15,6 +15,42 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
   onConfirmClue,
 }) => {
   const [activeFolderId, setActiveFolderId] = useState<number | null>(null);
+  const [lockNotice, setLockNotice] = useState<string | null>(null);
+
+  const getDuration = () => {
+    if (state.settings.clueReleaseSpeed === 'fast') return 30;
+    if (state.settings.clueReleaseSpeed === 'normal') return 60;
+    if (state.settings.clueReleaseSpeed === 'slow') return 120;
+    if (state.settings.clueReleaseSpeed === 'custom') return state.settings.customClueTimeSeconds || 45;
+    return 60;
+  };
+
+  const duration = getDuration();
+  const [timeLeft, setTimeLeft] = useState<number>(duration);
+
+  useEffect(() => {
+    if (!state.clueCycleStartTime) {
+      setTimeLeft(duration);
+      return;
+    }
+    const updateTimer = () => {
+      const elapsed = Math.floor((Date.now() - state.clueCycleStartTime!) / 1000);
+      const rem = Math.max(0, duration - elapsed);
+      setTimeLeft(rem);
+    };
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [state.clueCycleStartTime, state.settings.clueReleaseSpeed, state.settings.customClueTimeSeconds]);
+
+  const isTimerUnlocked = timeLeft === 0;
+
+  // Auto-close open folder if timer resets to positive (i.e. after confirmation)
+  useEffect(() => {
+    if (!isTimerUnlocked) {
+      setActiveFolderId(null);
+    }
+  }, [isTimerUnlocked]);
 
   // Gather all cards currently in play across all players for smart clue suggestions
   const cardsInPlay: Card[] = [];
@@ -25,29 +61,99 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
   const activeFolder = activeFolderId !== null ? INVESTIGATION_FOLDERS.find((f) => f.id === activeFolderId) : null;
   const draftClues = state.meDraftClues || {};
   const confirmedClues = state.confirmedClues || [];
-  const changedCount = state.meChangedClueCount || 0;
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const handleFolderClick = (folderId: number) => {
+    if (folderId === 0 || folderId === 1) {
+      setLockNotice(`الدليلان الأول والثاني (موقع الجريمة وسبب الوفاة) دائمين ومكشوفين تلقائياً لجميع اللاعبين منذ بداية القضية.`);
+      setTimeout(() => setLockNotice(null), 4000);
+      return;
+    }
+    if (!isTimerUnlocked) {
+      setLockNotice(`المؤقت لم ينتهِ بعد! لا يمكنك فتح المجلد حتى يصل المؤقت إلى 00:00 (متبقي ${formatTime(timeLeft)})`);
+      setTimeout(() => setLockNotice(null), 4000);
+      return;
+    }
+    setActiveFolderId(activeFolderId === folderId ? null : folderId);
+  };
 
   return (
-    <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <h2 className="text-xl font-extrabold text-zinc-100 font-serif uppercase tracking-wider">
-              Medical Examiner Investigation Folders
-            </h2>
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-6 dir-rtl text-right">
+      {/* Header & Clue Release Timer Banner */}
+      <div className="space-y-4 border-b border-zinc-800 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <h2 className="text-xl font-extrabold text-zinc-100 font-serif uppercase tracking-wider">
+                مجلدات التحقيق الخاصة بالطبيب الشرعي
+              </h2>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1 font-serif">
+              مجلدات القضية مغلقة سرّياً. يتم فتح إمكانية اختيار دليل واحد في كل دورة مؤقت.
+            </p>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
-            Analyze crime scene cards. Open folders, highlight clues with yellow marker, and release findings to investigators.
-          </p>
+
+          <div className="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs font-mono">
+            <span className="text-zinc-500">الأدلة المكشوفة:</span>
+            <span className="font-bold text-amber-400">{confirmedClues.length} / 6</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs font-mono">
-          <span className="text-zinc-500">Clue Change Limit:</span>
-          <span className={`font-bold ${changedCount >= 1 ? 'text-red-400' : 'text-emerald-400'}`}>
-            {1 - changedCount} / 1 Left
-          </span>
+        {/* Live Timer Status Box */}
+        <div
+          className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-3 transition-all ${
+            isTimerUnlocked
+              ? 'border-emerald-500/60 bg-emerald-950/30 text-emerald-200 ring-2 ring-emerald-500/20'
+              : 'border-amber-500/40 bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-950 text-amber-200'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {isTimerUnlocked ? (
+              <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 animate-bounce">
+                <Unlock className="w-5 h-5" />
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400">
+                <Lock className="w-5 h-5" />
+              </div>
+            )}
+            <div>
+              <h3 className="text-sm font-extrabold font-serif">
+                {isTimerUnlocked
+                  ? '🔓 تم فتح كشف الدليل! اختر مجلداً واحداً واضغط تأكيد الكشف.'
+                  : '🔒 مؤقت كشف الأدلة جاري...'
+                }
+              </h3>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {isTimerUnlocked
+                  ? 'يمكنك الآن فتح مجلد، قراءة الخيارات، واختيار دليل واحد لإصداره لجميع اللاعبين.'
+                  : `يفتح الدليل التالي عند انتهاء الوقت. يرجى انتظار المؤقت.`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-black/60 px-4 py-2 rounded-xl border border-zinc-800 font-mono">
+            <Clock className="w-4 h-4 text-sky-400" />
+            <span className="text-xs text-zinc-400">الوقت المتبقي:</span>
+            <span className={`text-base font-extrabold ${isTimerUnlocked ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {formatTime(timeLeft)}
+            </span>
+          </div>
         </div>
+
+        {/* Lock Notice Warning */}
+        {lockNotice && (
+          <div className="p-3 rounded-xl bg-red-950/60 border border-red-800 text-red-200 text-xs flex items-center gap-2 animate-in fade-in">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <span>{lockNotice}</span>
+          </div>
+        )}
       </div>
 
       {/* 6 Realistic Investigation Folders (3 Top, 3 Bottom) */}
@@ -61,13 +167,15 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
           return (
             <div
               key={folder.id}
-              onClick={() => setActiveFolderId(isOpen ? null : folder.id)}
+              onClick={() => handleFolderClick(folder.id)}
               className={`group relative rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden p-5 flex flex-col justify-between h-44 shadow-xl ${
                 isOpen
                   ? 'border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20 scale-102'
                   : isConfirmed
-                  ? 'border-emerald-500/50 bg-zinc-900/60'
-                  : 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-900/80'
+                  ? 'border-emerald-500/50 bg-zinc-900/60 opacity-90'
+                  : !isTimerUnlocked
+                  ? 'border-zinc-800/80 bg-zinc-900/30 hover:border-zinc-700'
+                  : 'border-zinc-700 bg-zinc-900/60 hover:border-amber-500/60 hover:bg-zinc-900/80'
               }`}
             >
               {/* Folder tab accent line */}
@@ -77,12 +185,14 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                 <div className="flex items-center gap-3">
                   {isOpen ? (
                     <FolderOpen className="w-8 h-8 text-amber-400 filter drop-shadow" />
+                  ) : !isTimerUnlocked && !isConfirmed ? (
+                    <Folder className="w-8 h-8 text-zinc-600" />
                   ) : (
                     <Folder className="w-8 h-8 text-amber-500/80 group-hover:text-amber-400 transition-colors" />
                   )}
                   <div>
                     <span className="text-[10px] font-mono text-zinc-500 uppercase block">
-                      FOLDER #{folder.id + 1}
+                      مجلد #{folder.id + 1}
                     </span>
                     <h3 className="text-base font-bold text-zinc-100 font-serif leading-tight">
                       {folder.name}
@@ -90,9 +200,21 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   </div>
                 </div>
 
-                {isConfirmed && (
+                {folder.id === 0 || folder.id === 1 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-300 flex items-center gap-1 font-mono">
+                    <CheckCircle className="w-3 h-3 text-amber-400" /> دليل دائم
+                  </span>
+                ) : isConfirmed ? (
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-bold text-emerald-300 flex items-center gap-1 font-mono">
-                    <CheckCircle className="w-3 h-3" /> RELEASED
+                    <CheckCircle className="w-3 h-3" /> تم الإصدار
+                  </span>
+                ) : !isTimerUnlocked ? (
+                  <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-amber-400" /> مغلق
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-[10px] font-mono text-amber-300 flex items-center gap-1 animate-pulse">
+                    <Unlock className="w-3 h-3" /> متاح الآن
                   </span>
                 )}
               </div>
@@ -100,22 +222,22 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
               {/* Highlighted clue preview inside folder */}
               <div className="mt-3 pt-3 border-t border-zinc-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-zinc-400 font-mono">Status:</span>
+                  <span className="text-[11px] text-zinc-400 font-mono">الحالة:</span>
                   {confirmedClue ? (
                     <span className="text-xs font-bold text-yellow-300 bg-yellow-400/20 px-2 py-0.5 rounded border border-yellow-400/40 uppercase">
                       {confirmedClue.clueTag}
                     </span>
                   ) : draftClue ? (
                     <span className="text-xs font-semibold text-amber-400 italic">
-                      Draft: "{draftClue}"
+                      مسودة: "{draftClue}"
                     </span>
                   ) : (
-                    <span className="text-xs text-zinc-600 italic">Uninspected</span>
+                    <span className="text-xs text-zinc-500 italic">غير مفحوص</span>
                   )}
                 </div>
 
                 <span className="text-[11px] font-mono text-amber-400 group-hover:translate-x-1 transition-transform">
-                  {isOpen ? 'Close File ▲' : 'Open File ▼'}
+                  {isOpen ? 'إغلاق الملف ▲' : isTimerUnlocked ? 'فتح الملف ▼' : 'مغلق 🔒'}
                 </span>
               </div>
             </div>
@@ -124,15 +246,15 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
       </div>
 
       {/* Opened Folder Clue Options Panel (3 Left, 3 Right) */}
-      {activeFolder && (
+      {activeFolder && isTimerUnlocked && (
         <div className="rounded-2xl border border-amber-500/50 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6 shadow-2xl animate-in slide-in-from-top duration-300 space-y-5">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
             <div>
               <span className="text-xs font-mono text-amber-400 uppercase font-bold">
-                FOLDER CONTENTS: #{activeFolder.id + 1} - {activeFolder.name}
+                محتويات المجلد: #{activeFolder.id + 1} - {activeFolder.name}
               </span>
               <h4 className="text-lg font-bold text-zinc-100 font-serif">
-                Select Forensic Clue Option
+                اختر تلميح الدليل الجنائي
               </h4>
             </div>
 
@@ -140,12 +262,12 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
               onClick={() => setActiveFolderId(null)}
               className="text-xs text-zinc-400 hover:text-zinc-200"
             >
-              ✕ Close File
+              ✕ إغلاق الملف
             </button>
           </div>
 
-          <p className="text-xs text-zinc-400">
-            Choose one option below. Highlighted with yellow marker. Select options matching multiple cards in play to spark discussion!
+          <p className="text-xs text-zinc-400 font-serif">
+            اختر خياراً واحداً أدناه، ثم اضغط تأكيد الكشف لإصدار الدليل للجميع وبدء مؤقت الدليل التالي تلقائياً!
           </p>
 
           {/* 3 Left, 3 Right Clue Options Layout */}
@@ -160,7 +282,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   <button
                     key={option}
                     onClick={() => onSelectDraftClue(activeFolder.id, option)}
-                    className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between ${
+                    className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                       isSelected
                         ? 'border-yellow-400 bg-yellow-400/20 ring-2 ring-yellow-400/40 shadow-lg shadow-yellow-400/10'
                         : 'border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 hover:bg-zinc-900'
@@ -180,7 +302,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                     </div>
 
                     <span className="text-[10px] text-zinc-500 font-mono bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">
-                      Matches {matchesCount} Cards
+                      يطابق {matchesCount} بطاقات
                     </span>
                   </button>
                 );
@@ -197,7 +319,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   <button
                     key={option}
                     onClick={() => onSelectDraftClue(activeFolder.id, option)}
-                    className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between ${
+                    className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                       isSelected
                         ? 'border-yellow-400 bg-yellow-400/20 ring-2 ring-yellow-400/40 shadow-lg shadow-yellow-400/10'
                         : 'border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 hover:bg-zinc-900'
@@ -217,7 +339,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                     </div>
 
                     <span className="text-[10px] text-zinc-500 font-mono bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">
-                      Matches {matchesCount} Cards
+                      يطابق {matchesCount} بطاقات
                     </span>
                   </button>
                 );
@@ -228,15 +350,20 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
           {/* Confirm & Release Clue Action */}
           <div className="pt-4 border-t border-zinc-800 flex justify-end gap-3">
             <button
-              disabled={!draftClues[activeFolder.id]}
-              onClick={() => onConfirmClue(activeFolder.id)}
+              disabled={!draftClues[activeFolder.id] || !isTimerUnlocked}
+              onClick={() => {
+                if (draftClues[activeFolder.id] && isTimerUnlocked) {
+                  onConfirmClue(activeFolder.id);
+                  setActiveFolderId(null);
+                }
+              }}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all ${
-                draftClues[activeFolder.id]
+                draftClues[activeFolder.id] && isTimerUnlocked
                   ? 'bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-lg shadow-amber-500/20 cursor-pointer'
                   : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-800'
               }`}
             >
-              <Send className="w-4 h-4" /> Confirm & Release Clue to Investigators
+              <Send className="w-4 h-4" /> تأكيد وإصدار الدليل للجميع
             </button>
           </div>
         </div>

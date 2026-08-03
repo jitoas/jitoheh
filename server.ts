@@ -9,7 +9,13 @@ async function startServer() {
   const app = express();
   const server = http.createServer(app);
   const io = new SocketIOServer(server, {
-    cors: { origin: '*' },
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+    transports: ['websocket', 'polling'],
+    pingTimeout: 30000,
+    pingInterval: 10000,
   });
 
   app.use(express.json());
