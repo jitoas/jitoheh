@@ -45,6 +45,7 @@ export interface CaseSettings {
   medicalExaminerPlayerId: string | null;
   clueReleaseSpeed: ClueSpeed;
   customClueTimeSeconds?: number;
+  slotTimers?: Record<number, number>;
   maxPlayers: 6 | 8 | 10 | 12;
 }
 
@@ -107,6 +108,7 @@ export interface CaseState {
   jokerTargetKillerGuess: string | null;
   confirmedClues: ConfirmedClue[];
   clueCycleStartTime: number | null;
+  slotStartTimes?: Record<number, number>;
   meDraftClues: Record<number, string>; // folderIndex -> clueTag
   meChangedClueCount: number; // Max 1 change allowed
   votes: Record<string, VoteData>;
@@ -150,6 +152,7 @@ export interface ClientGameState {
   };
   confirmedClues: ConfirmedClue[];
   clueCycleStartTime: number | null;
+  slotStartTimes?: Record<number, number>;
   meDraftClues?: Record<number, string>; // only for ME
   meChangedClueCount?: number;
   latestVoteResult: VoteResult | null;

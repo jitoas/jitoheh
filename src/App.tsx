@@ -515,6 +515,8 @@ export default function App() {
                   <ClueBoard
                     clues={gameState.confirmedClues}
                     clueCycleStartTime={gameState.clueCycleStartTime}
+                    slotStartTimes={gameState.slotStartTimes}
+                    settings={gameState.settings}
                     clueReleaseSpeed={gameState.settings.clueReleaseSpeed}
                     customClueTimeSeconds={gameState.settings.customClueTimeSeconds}
                   />

@@ -1,46 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { ConfirmedClue, ClueSpeed } from '../types';
-import { INVESTIGATION_FOLDERS } from '../data/clues';
+import { ConfirmedClue, CaseSettings } from '../types';
+import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
 import { ShieldAlert, CheckCircle2, Clock, Lock, Sparkles } from 'lucide-react';
 
 interface ClueBoardProps {
   clues: ConfirmedClue[];
   clueCycleStartTime?: number | null;
-  clueReleaseSpeed?: ClueSpeed;
+  slotStartTimes?: Record<number, number>;
+  settings?: CaseSettings;
+  clueReleaseSpeed?: string;
   customClueTimeSeconds?: number;
 }
 
 export const ClueBoard: React.FC<ClueBoardProps> = ({
   clues,
   clueCycleStartTime,
+  slotStartTimes,
+  settings,
   clueReleaseSpeed,
   customClueTimeSeconds,
 }) => {
-  const getDuration = () => {
-    if (clueReleaseSpeed === 'fast') return 30;
-    if (clueReleaseSpeed === 'normal') return 60;
-    if (clueReleaseSpeed === 'slow') return 120;
-    if (clueReleaseSpeed === 'custom') return customClueTimeSeconds || 45;
-    return 60;
-  };
-
-  const duration = getDuration();
-  const [timeLeft, setTimeLeft] = useState<number>(duration);
+  const [now, setNow] = useState<number>(Date.now());
 
   useEffect(() => {
-    if (!clueCycleStartTime) {
-      setTimeLeft(duration);
-      return;
-    }
-    const updateTimer = () => {
-      const elapsed = Math.floor((Date.now() - clueCycleStartTime) / 1000);
-      const rem = Math.max(0, duration - elapsed);
-      setTimeLeft(rem);
-    };
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
+    const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
-  }, [clueCycleStartTime, clueReleaseSpeed, customClueTimeSeconds]);
+  }, []);
+
+  const activeSettings = {
+    clueReleaseSpeed: settings?.clueReleaseSpeed || clueReleaseSpeed || 'normal',
+    customClueTimeSeconds: settings?.customClueTimeSeconds || customClueTimeSeconds,
+    slotTimers: settings?.slotTimers,
+  };
+
+  const getSlotTimeLeft = (folderId: number): number => {
+    const duration = getSlotTimerDuration(activeSettings, folderId);
+    if (duration === 0) return 0; // Folder 1 & 2 always unlocked!
+
+    const startTime = (slotStartTimes && slotStartTimes[folderId]) || clueCycleStartTime || now;
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    return Math.max(0, duration - elapsedSeconds);
+  };
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -59,29 +59,24 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
           </h2>
         </div>
 
-        {/* Timer status badge */}
+        {/* Clue count badge */}
         <div className="flex items-center gap-3 bg-zinc-900/90 px-3.5 py-1.5 rounded-xl border border-zinc-800 font-mono text-xs">
           <Clock className="w-4 h-4 text-sky-400" />
           {clues.length >= 6 ? (
             <span className="text-emerald-400 font-bold">تم كشف جميع الأدلة الـ6</span>
-          ) : timeLeft > 0 ? (
-            <div className="flex items-center gap-2">
-              <span className="text-zinc-400">الدليل التالي ينكشف بعد:</span>
-              <span className="text-amber-400 font-extrabold text-sm">{formatTime(timeLeft)}</span>
-            </div>
           ) : (
-            <span className="text-emerald-400 font-bold animate-pulse">
-              🔓 المؤقت اكتمل! الطبيب الشرعي يحدد الدليل التالي...
-            </span>
+            <span className="text-amber-400 font-bold">الأدلة المكشوفة: {clues.length} / 6</span>
           )}
         </div>
       </div>
 
-      {/* 6-Folder Grid (3 Columns: Top-Left, Top-Center, Top-Right, Bottom-Left, Bottom-Center, Bottom-Right) */}
+      {/* 6-Folder Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 dir-ltr">
         {INVESTIGATION_FOLDERS.map((folder, folderIdx) => {
           const isPermanent = folderIdx === 0 || folderIdx === 1;
           const confirmedClue = clues.find((c) => c.folderIndex === folderIdx);
+          const remainingTime = getSlotTimeLeft(folderIdx);
+          const isUnlocked = remainingTime === 0;
 
           return (
             <div
@@ -122,10 +117,16 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
                       {confirmedClue.clueTag}
                     </span>
                   </div>
+                ) : isUnlocked ? (
+                  <div className="mt-3 p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-center animate-pulse">
+                    <span className="text-xs font-mono text-emerald-400 block font-bold">
+                      🔓 متاح الآن — الطبيب الشرعي يختار الدليل...
+                    </span>
+                  </div>
                 ) : (
                   <div className="mt-3 p-3 rounded-xl border border-dashed border-zinc-800/80 bg-black/40 text-center">
-                    <span className="text-xs font-mono text-zinc-500 block">
-                      ⏳ بانتهاء المؤقت ({formatTime(timeLeft)})
+                    <span className="text-xs font-mono text-amber-400 block font-semibold">
+                      ⏳ ينكشف بعد ({formatTime(remainingTime)})
                     </span>
                   </div>
                 )}
@@ -134,14 +135,16 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
               {/* Footer status */}
               <div className="mt-4 flex items-center justify-between text-[10px] text-zinc-500 font-mono border-t border-zinc-800/80 pt-2">
                 <span>
-                  {isPermanent ? 'دليل مكشوف دائماً' : confirmedClue ? 'أدلة موثقة' : 'مغلق بانتظار الوقت'}
+                  {isPermanent ? 'دليل مكشوف دائماً' : confirmedClue ? 'أدلة موثقة' : isUnlocked ? 'متاح لاختيار الطبيب الشرعي' : 'مغلق بانتظار المؤقت'}
                 </span>
                 {confirmedClue ? (
                   <span className="flex items-center gap-1 text-emerald-400 font-semibold">
                     <CheckCircle2 className="w-3 h-3" /> مؤكد
                   </span>
+                ) : isUnlocked ? (
+                  <span className="text-emerald-400 font-mono">جاهز للكشف</span>
                 ) : (
-                  <span className="text-zinc-600 font-mono">ينكشف بالمؤقت</span>
+                  <span className="text-amber-400 font-mono">{formatTime(remainingTime)}</span>
                 )}
               </div>
             </div>

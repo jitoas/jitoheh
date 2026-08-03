@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ClientGameState, PlayerProfile, CaseSettings } from '../types';
 import { DETECTIVE_AVATARS } from './CardArt';
+import { getSlotTimerDuration } from '../data/clues';
 import {
   Copy,
   Check,
@@ -305,17 +306,31 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
             )}
           </div>
 
-          {/* Clue Release Speed */}
-          <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-2">
+          {/* Clue Release Speed & Independent Slot Timers */}
+          <div className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/30 space-y-3">
             <span className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-sky-400" /> سرعة كشف الأدلة
+              <Clock className="w-3.5 h-3.5 text-sky-400" /> سرعة ومؤقتات كشف الأدلة الفردية
             </span>
             <div className="grid grid-cols-4 gap-1.5">
               {(['fast', 'normal', 'slow', 'custom'] as const).map((speed) => (
                 <button
                   key={speed}
                   disabled={!isHost}
-                  onClick={() => onUpdateSettings({ clueReleaseSpeed: speed })}
+                  onClick={() => {
+                    const presetTimers =
+                      speed === 'fast'
+                        ? { 2: 15, 3: 30, 4: 45, 5: 60 }
+                        : speed === 'slow'
+                        ? { 2: 60, 3: 120, 4: 180, 5: 240 }
+                        : speed === 'normal'
+                        ? { 2: 30, 3: 60, 4: 90, 5: 120 }
+                        : state.settings.slotTimers || { 2: 30, 3: 60, 4: 90, 5: 120 };
+
+                    onUpdateSettings({
+                      clueReleaseSpeed: speed,
+                      slotTimers: presetTimers,
+                    });
+                  }}
                   className={`py-1.5 rounded-lg text-[10px] font-semibold uppercase font-mono transition-colors ${
                     state.settings.clueReleaseSpeed === speed
                       ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
@@ -323,34 +338,73 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                   }`}
                 >
                   {speed === 'fast'
-                    ? 'سريع (30ث)'
+                    ? 'سريع (15-60ث)'
                     : speed === 'normal'
-                    ? 'عادي (60ث)'
+                    ? 'عادي (30-120ث)'
                     : speed === 'slow'
-                    ? 'بطيء (120ث)'
+                    ? 'بطيء (60-240ث)'
                     : 'مخصص'}
                 </button>
               ))}
             </div>
 
-            {state.settings.clueReleaseSpeed === 'custom' && (
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] text-zinc-400 font-serif">الوقت المخصص (بالثواني):</span>
-                <input
-                  type="number"
-                  min={10}
-                  max={600}
-                  disabled={!isHost}
-                  value={state.settings.customClueTimeSeconds || 45}
-                  onChange={(e) =>
-                    onUpdateSettings({
-                      customClueTimeSeconds: Math.max(10, parseInt(e.target.value) || 45),
-                    })
-                  }
-                  className="w-20 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-sky-300 font-mono focus:border-sky-500 focus:outline-none text-center"
-                />
+            {/* Individual Slot Timers Customization */}
+            <div className="space-y-2 pt-2 border-t border-zinc-800">
+              <span className="text-[11px] font-bold text-zinc-300 block">
+                مؤقتات خانات الأدلة المخصصة (كل خانة مستقلة):
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between">
+                  <span className="text-zinc-400 font-mono text-[11px]">خانة 1 (الموقع)</span>
+                  <span className="text-emerald-400 font-bold text-[10px]">مفتوح دائماً (0ث)</span>
+                </div>
+                <div className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between">
+                  <span className="text-zinc-400 font-mono text-[11px]">خانة 2 (سبب الوفاة)</span>
+                  <span className="text-emerald-400 font-bold text-[10px]">مفتوح دائماً (0ث)</span>
+                </div>
+                {[
+                  { id: 2, label: 'خانة 3' },
+                  { id: 3, label: 'خانة 4' },
+                  { id: 4, label: 'خانة 5' },
+                  { id: 5, label: 'خانة 6' },
+                ].map((slot) => {
+                  const currentVal = getSlotTimerDuration(state.settings, slot.id);
+                  return (
+                    <div
+                      key={slot.id}
+                      className="p-2 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between"
+                    >
+                      <span className="text-zinc-300 font-mono text-[11px]">{slot.label}</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min={5}
+                          max={600}
+                          disabled={!isHost}
+                          value={currentVal}
+                          onChange={(e) => {
+                            const val = Math.max(1, parseInt(e.target.value) || 30);
+                            const currentTimers = {
+                              2: getSlotTimerDuration(state.settings, 2),
+                              3: getSlotTimerDuration(state.settings, 3),
+                              4: getSlotTimerDuration(state.settings, 4),
+                              5: getSlotTimerDuration(state.settings, 5),
+                              ...(state.settings.slotTimers || {}),
+                            };
+                            onUpdateSettings({
+                              clueReleaseSpeed: 'custom',
+                              slotTimers: { ...currentTimers, [slot.id]: val },
+                            });
+                          }}
+                          className="w-16 rounded border border-zinc-700 bg-zinc-900 px-2 py-0.5 text-xs text-sky-300 font-mono text-center focus:border-sky-500 focus:outline-none"
+                        />
+                        <span className="text-[10px] text-zinc-500 font-mono">ث</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Max Players */}

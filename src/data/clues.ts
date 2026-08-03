@@ -109,3 +109,31 @@ export function getClueMatchesCount(clueTagOrName: string, cardsInPlay: Card[]):
   }).length;
 }
 
+// Helper to get duration for a specific slot/folder timer
+export function getSlotTimerDuration(
+  settings: { clueReleaseSpeed?: string; customClueTimeSeconds?: number; slotTimers?: Record<number, number> },
+  folderIndex: number
+): number {
+  if (folderIndex === 0 || folderIndex === 1) return 0; // Slots 1 & 2 are always unlocked
+
+  if (settings.slotTimers && settings.slotTimers[folderIndex] !== undefined) {
+    return settings.slotTimers[folderIndex];
+  }
+
+  if (settings.clueReleaseSpeed === 'fast') {
+    const defaults: Record<number, number> = { 2: 15, 3: 30, 4: 45, 5: 60 };
+    return defaults[folderIndex] ?? 30;
+  }
+  if (settings.clueReleaseSpeed === 'slow') {
+    const defaults: Record<number, number> = { 2: 60, 3: 120, 4: 180, 5: 240 };
+    return defaults[folderIndex] ?? 120;
+  }
+  if (settings.clueReleaseSpeed === 'custom' && settings.customClueTimeSeconds) {
+    const multiplier = folderIndex - 1;
+    return settings.customClueTimeSeconds * multiplier;
+  }
+
+  const normalDefaults: Record<number, number> = { 2: 30, 3: 60, 4: 90, 5: 120 };
+  return normalDefaults[folderIndex] ?? 30;
+}
+

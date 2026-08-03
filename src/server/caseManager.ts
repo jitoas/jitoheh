@@ -1,7 +1,7 @@
 import { Card, CaseState, CaseSettings, Player, Role, VoteResult, ConfirmedClue } from '../types';
 import { WEAPONS_DATABASE } from '../data/weapons';
 import { EVIDENCE_DATABASE } from '../data/evidence';
-import { INVESTIGATION_FOLDERS } from '../data/clues';
+import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
 import { getRandomEvent } from '../data/events';
 
 const casesMap = new Map<string, CaseState>();
@@ -397,6 +397,14 @@ export function killerSelectCards(code: string, killerId: string, weaponId: stri
   c.phase = 'INVESTIGATION';
   const now = Date.now();
   c.clueCycleStartTime = now;
+  c.slotStartTimes = {
+    0: now,
+    1: now,
+    2: now,
+    3: now,
+    4: now,
+    5: now,
+  };
 
   c.confirmedClues = [];
 
@@ -420,11 +428,13 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
   if (c.medicalExaminerId !== meId) throw new Error('يمكن للطبيب الشرعي فقط تأكيد الأدلة');
 
   const now = Date.now();
-  const duration = getClueCycleDuration(c.settings);
-  const elapsedSeconds = c.clueCycleStartTime ? Math.floor((now - c.clueCycleStartTime) / 1000) : duration;
-  if (c.clueCycleStartTime && elapsedSeconds < duration - 2) {
+  const duration = getSlotTimerDuration(c.settings, folderIndex);
+  const startTime = (c.slotStartTimes && c.slotStartTimes[folderIndex]) || c.clueCycleStartTime || now;
+  const elapsedSeconds = Math.floor((now - startTime) / 1000);
+
+  if (duration > 0 && elapsedSeconds < duration - 2) {
     const remaining = Math.max(1, duration - elapsedSeconds);
-    throw new Error(`لا يمكنك كشف الدليل حتى ينتهي مؤقت الأدلة (متبقي ${remaining} ثانية)`);
+    throw new Error(`لا يمكنك كشف أو تغيير الدليل للمجلد #${folderIndex + 1} حتى ينتهي مؤقته الخاص (متبقي ${remaining} ثانية)`);
   }
 
   const draftTag = c.meDraftClues[folderIndex];
@@ -443,7 +453,7 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
       folderIndex,
       folderName: folder.name,
       clueTag: draftTag,
-      confirmedAt: Date.now(),
+      confirmedAt: now,
     };
     c.meChangedClueCount++;
     c.log.push(`قام الطبيب الشرعي بتغيير دليل مجلد التحقيق #${folderIndex + 1} إلى "${draftTag}".`);
@@ -452,13 +462,16 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
       folderIndex,
       folderName: folder.name,
       clueTag: draftTag,
-      confirmedAt: Date.now(),
+      confirmedAt: now,
     });
     c.log.push(`قام الطبيب الشرعي بإصدار دليل مجلد التحقيق #${folderIndex + 1}: "${draftTag}".`);
   }
 
-  // Restart timer immediately for the next clue cycle
-  c.clueCycleStartTime = Date.now();
+  // Restart timer ONLY for this specific slot
+  if (!c.slotStartTimes) {
+    c.slotStartTimes = {};
+  }
+  c.slotStartTimes[folderIndex] = now;
 
   return c;
 }
@@ -591,6 +604,7 @@ export function returnToLobby(code: string, hostId: string): CaseState {
   c.jokerVotedOut = false;
   c.jokerTargetKillerGuess = null;
   c.confirmedClues = [];
+  c.slotStartTimes = {};
   c.meDraftClues = {};
   c.meChangedClueCount = 0;
   c.votes = {};
@@ -677,6 +691,7 @@ export function getClientState(caseCode: string, playerId: string): any {
     intel,
     confirmedClues: c.confirmedClues,
     clueCycleStartTime: c.clueCycleStartTime,
+    slotStartTimes: c.slotStartTimes,
     meDraftClues: myRole === 'MEDICAL_EXAMINER' ? c.meDraftClues : undefined,
     meChangedClueCount: myRole === 'MEDICAL_EXAMINER' ? c.meChangedClueCount : undefined,
     latestVoteResult: c.latestVoteResult,
