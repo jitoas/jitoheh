@@ -3,6 +3,15 @@ import crimeEvidenceArt from '../assets/images/crime_evidence_art_1785743002100.
 import crimePoisonArt from '../assets/images/crime_poison_art_1785743012153.jpg';
 import crimeDossierArt from '../assets/images/crime_dossier_art_1785743022427.jpg';
 
+import noirBladeArt from '../assets/images/noir_weapon_blade_1785747901749.jpg';
+import noirGunArt from '../assets/images/noir_weapon_gun_1785747919508.jpg';
+import noirBluntArt from '../assets/images/noir_weapon_blunt_1785747933608.jpg';
+import noirStrangleArt from '../assets/images/noir_weapon_strangle_1785747944872.jpg';
+import noirForensicsArt from '../assets/images/noir_evidence_forensics_1785747956838.jpg';
+import noirPersonalArt from '../assets/images/noir_evidence_personal_1785747972603.jpg';
+import noirDocumentsArt from '../assets/images/noir_evidence_documents_1785747986068.jpg';
+import noirClothingArt from '../assets/images/noir_evidence_clothing_1785748009542.jpg';
+
 export const AI_GENERATED_HERO_ART = {
   weapon: crimeWeaponArt,
   evidence: crimeEvidenceArt,
@@ -13,42 +22,42 @@ export const AI_GENERATED_HERO_ART = {
 // High resolution dark noir realistic crime scene evidence photography mapping
 const WEAPON_IMAGES: Record<string, string> = {
   // Knives & Blades
-  knife: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=600&q=80',
-  blade: 'https://images.unsplash.com/photo-1589256469067-ea99122bbec9?auto=format&fit=crop&w=600&q=80',
-  cleaver: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=600&q=80',
-  axe: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=600&q=80',
-  scissors: 'https://images.unsplash.com/photo-1503792501406-2c40da09e1e2?auto=format&fit=crop&w=600&q=80',
-  razor: 'https://images.unsplash.com/photo-1503792501406-2c40da09e1e2?auto=format&fit=crop&w=600&q=80',
+  knife: noirBladeArt,
+  blade: noirBladeArt,
+  cleaver: noirBladeArt,
+  axe: noirBladeArt,
+  scissors: noirBladeArt,
+  razor: noirBladeArt,
   
   // Firearms & Bullets
-  gun: 'https://images.unsplash.com/photo-1595590424283-b8f17842773f?auto=format&fit=crop&w=600&q=80',
-  revolver: 'https://images.unsplash.com/photo-1584281722572-8820c7490214?auto=format&fit=crop&w=600&q=80',
-  bullet: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=600&q=80',
+  gun: noirGunArt,
+  revolver: noirGunArt,
+  bullet: noirGunArt,
 
   // Poisons & Chemicals
   poison: crimePoisonArt,
-  chemical: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=600&q=80',
-  syringe: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
-  vial: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=600&q=80',
-  acid: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=600&q=80',
+  chemical: crimePoisonArt,
+  syringe: crimePoisonArt,
+  vial: crimePoisonArt,
+  acid: crimePoisonArt,
 
   // Blunt & Impact Weapons
-  hammer: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?auto=format&fit=crop&w=600&q=80',
-  crowbar: crimeDossierArt,
-  bat: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80',
-  pipe: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=80',
-  candlestick: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=600&q=80',
+  hammer: noirBluntArt,
+  crowbar: noirBluntArt,
+  bat: noirBluntArt,
+  pipe: noirBluntArt,
+  candlestick: noirBluntArt,
 
   // Ropes & Wires
-  rope: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80',
-  wire: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80',
+  rope: noirStrangleArt,
+  wire: noirStrangleArt,
 
   // Fire & Electricity
-  fire: 'https://images.unsplash.com/photo-1508873696983-2df515122519?auto=format&fit=crop&w=600&q=80',
-  electric: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80',
+  fire: noirBluntArt,
+  electric: noirStrangleArt,
 
   // Glass
-  glass: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+  glass: noirBladeArt,
 
   // Default fallback
   default: crimeWeaponArt,
@@ -56,29 +65,29 @@ const WEAPON_IMAGES: Record<string, string> = {
 
 const EVIDENCE_IMAGES: Record<string, string> = {
   // Forensics
-  fingerprint: crimeEvidenceArt,
-  blood: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
+  fingerprint: noirForensicsArt,
+  blood: noirForensicsArt,
   footprint: crimeDossierArt,
-  hair: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
-  soil: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
+  hair: noirForensicsArt,
+  soil: noirForensicsArt,
 
   // Personal Items & Valuables
-  watch: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
-  ring: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
-  wallet: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80',
-  key: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80',
-  glove: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80',
-  glasses: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=600&q=80',
-  coin: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=80',
+  watch: noirPersonalArt,
+  ring: noirPersonalArt,
+  wallet: noirPersonalArt,
+  key: noirPersonalArt,
+  glove: noirClothingArt,
+  glasses: noirPersonalArt,
+  coin: noirPersonalArt,
 
   // Documents & Notes
-  paper: 'https://images.unsplash.com/photo-1583521214690-73421a1829a9?auto=format&fit=crop&w=600&q=80',
-  photo: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80',
-  receipt: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+  paper: noirDocumentsArt,
+  photo: noirDocumentsArt,
+  receipt: noirDocumentsArt,
 
   // Medical & Bottles
-  medicine: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=600&q=80',
-  cup: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+  medicine: crimePoisonArt,
+  cup: noirPersonalArt,
 
   // Default fallback
   default: crimeEvidenceArt,
