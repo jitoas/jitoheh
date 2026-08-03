@@ -316,7 +316,17 @@ export default function App() {
       <PlayerInventoryModal
         player={inspectedPlayer || null}
         onClose={() => setInspectPlayerId(null)}
-        canAccuse={gameState.phase === 'INVESTIGATION' && !mePlayer?.hasVoted && !isME}
+        canAccuse={
+          gameState.phase === 'INVESTIGATION' &&
+          !mePlayer?.hasVoted &&
+          !isME &&
+          (inspectedPlayer
+            ? !(
+                (myRole === 'KILLER' && gameState.intel?.accompliceId && inspectedPlayer.id === gameState.intel.accompliceId) ||
+                (myRole === 'ACCOMPLICE' && gameState.intel?.killerId && inspectedPlayer.id === gameState.intel.killerId)
+              )
+            : false)
+        }
         onAccuse={(pId) => {
           setVoteTargetPlayerId(pId);
           setIsVotingModalOpen(true);

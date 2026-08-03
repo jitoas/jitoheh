@@ -480,6 +480,16 @@ export function submitVote(
   const targetPlayer = c.players.find((p) => p.id === targetPlayerId);
   if (!targetPlayer) throw new Error('اللاعب المشتبه به غير موجود');
 
+  // Voting permission rules:
+  // - Killer CAN accuse themselves, but CANNOT accuse the Accomplice.
+  // - Accomplice CAN accuse themselves, but CANNOT accuse the Killer.
+  if ((voter.role === 'KILLER' || c.killerId === voterId) && c.accompliceId && targetPlayerId === c.accompliceId) {
+    throw new Error('القاتل لا يمكنه اتهام شريكه الجريمة');
+  }
+  if ((voter.role === 'ACCOMPLICE' || c.accompliceId === voterId) && c.killerId && targetPlayerId === c.killerId) {
+    throw new Error('الشريك لا يمكنه اتهام القاتل');
+  }
+
   // Find target's cards
   const targetWeapon = targetPlayer.weapons.find((w) => w.id === weaponId);
   const targetEvidence = targetPlayer.evidence.find((e) => e.id === evidenceId);

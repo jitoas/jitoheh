@@ -16,11 +16,26 @@ export const VotingModal: React.FC<VotingModalProps> = ({
   onClose,
   onSubmitVote,
 }) => {
-  const eligibleTargets = state.players.filter((p) => p.role !== 'MEDICAL_EXAMINER');
+  const isTargetAllowed = (tId: string) => {
+    if (state.myRole === 'KILLER' && state.intel?.accompliceId && tId === state.intel.accompliceId) {
+      return false;
+    }
+    if (state.myRole === 'ACCOMPLICE' && state.intel?.killerId && tId === state.intel.killerId) {
+      return false;
+    }
+    return true;
+  };
 
-  const [targetId, setTargetId] = useState<string>(
-    initialTargetPlayerId || eligibleTargets[0]?.id || ''
+  const eligibleTargets = state.players.filter(
+    (p) => p.role !== 'MEDICAL_EXAMINER' && isTargetAllowed(p.id)
   );
+
+  const defaultTargetId =
+    initialTargetPlayerId && isTargetAllowed(initialTargetPlayerId) && eligibleTargets.some((p) => p.id === initialTargetPlayerId)
+      ? initialTargetPlayerId
+      : eligibleTargets[0]?.id || '';
+
+  const [targetId, setTargetId] = useState<string>(defaultTargetId);
   const [selectedWeaponId, setSelectedWeaponId] = useState<string | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
 
@@ -28,7 +43,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
   const weapons = targetPlayer?.weapons || [];
   const evidence = targetPlayer?.evidence || [];
 
-  const canSubmit = targetId && selectedWeaponId && selectedEvidenceId;
+  const canSubmit = targetId && isTargetAllowed(targetId) && selectedWeaponId && selectedEvidenceId;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 overflow-y-auto dir-rtl">

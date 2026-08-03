@@ -427,19 +427,33 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                   <Eye className="w-3 h-3 text-amber-400" /> عرض الأدلة
                 </button>
 
-                {state.phase === 'INVESTIGATION' && !mePlayer?.hasVoted && myRole !== 'MEDICAL_EXAMINER' && (
-                  <button
-                    onClick={() => onOpenVoteModal(p.id)}
-                    disabled={isVotingOpen || mePlayer?.hasVoted}
-                    className={`flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-colors shadow-md ${
-                      isVotingOpen || mePlayer?.hasVoted
-                        ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
-                        : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30 cursor-pointer'
-                    }`}
-                  >
-                    <Vote className="w-3 h-3" /> الاتهام
-                  </button>
-                )}
+                {state.phase === 'INVESTIGATION' && !mePlayer?.hasVoted && myRole !== 'MEDICAL_EXAMINER' && (() => {
+                  const isInvalidTarget =
+                    (myRole === 'KILLER' && state.intel?.accompliceId && p.id === state.intel.accompliceId) ||
+                    (myRole === 'ACCOMPLICE' && state.intel?.killerId && p.id === state.intel.killerId);
+                  const isDisabled = isVotingOpen || mePlayer?.hasVoted || isInvalidTarget;
+
+                  return (
+                    <button
+                      onClick={() => !isDisabled && onOpenVoteModal(p.id)}
+                      disabled={isDisabled}
+                      title={
+                        isInvalidTarget
+                          ? myRole === 'KILLER'
+                            ? 'القاتل لا يمكنه اتهام شريكه'
+                            : 'الشريك لا يمكنه اتهام القاتل'
+                          : ''
+                      }
+                      className={`flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-colors shadow-md ${
+                        isDisabled
+                          ? 'bg-zinc-800/60 text-zinc-600 border border-zinc-800 cursor-not-allowed opacity-40'
+                          : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30 cursor-pointer'
+                      }`}
+                    >
+                      <Vote className="w-3 h-3" /> الاتهام
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           );
