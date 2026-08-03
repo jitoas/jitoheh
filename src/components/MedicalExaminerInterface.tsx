@@ -69,11 +69,6 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
   };
 
   const handleFolderClick = (folderId: number) => {
-    if (folderId === 0 || folderId === 1) {
-      setLockNotice(`الدليلان الأول والثاني (موقع الجريمة وسبب الوفاة) دائمين ومكشوفين تلقائياً لجميع اللاعبين منذ بداية القضية.`);
-      setTimeout(() => setLockNotice(null), 4000);
-      return;
-    }
     if (!isTimerUnlocked) {
       setLockNotice(`المؤقت لم ينتهِ بعد! لا يمكنك فتح المجلد حتى يصل المؤقت إلى 00:00 (متبقي ${formatTime(timeLeft)})`);
       setTimeout(() => setLockNotice(null), 4000);

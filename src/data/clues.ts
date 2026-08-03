@@ -46,13 +46,65 @@ export const INVESTIGATION_FOLDERS: ClueFolder[] = [
   },
 ];
 
+const TAG_MAP: Record<string, string[]> = {
+  // Folder 0: Location
+  'داخلي': ['house', 'hospital', 'school', 'kitchen', 'office'],
+  'خارجي': ['outdoor', 'construction', 'crime_scene'],
+  'منزل': ['house', 'kitchen'],
+  'مستشفى': ['hospital', 'medicine'],
+  'مدرسة': ['school', 'office'],
+  'موقع بناء': ['construction'],
+
+  // Folder 1: Cause of Death
+  'تسمم': ['poison', 'chemical', 'medicine'],
+  'خنق': ['strangulation', 'silent'],
+  'طعن': ['sharp', 'bleeding'],
+  'إطلاق نار': ['gunshot', 'noise'],
+  'صدمة قوة حادة': ['blunt', 'heavy'],
+  'حرق': ['burn', 'fire', 'heat'],
+
+  // Folder 2: Material
+  'معدن': ['metal', 'silver', 'gold'],
+  'زجاج': ['glass', 'fragile'],
+  'خشب': ['wood'],
+  'كيميائي': ['chemical'],
+  'سائل': ['liquid'],
+  'ألياف': ['fiber', 'leather'],
+
+  // Folder 3: Characteristic
+  'ثقيل': ['heavy'],
+  'حاد': ['sharp'],
+  'قابل للكسر': ['fragile', 'glass'],
+  'صامت': ['silent'],
+  'مرن': ['flexible', 'fiber'],
+  'خفيف': ['small', 'paper'],
+
+  // Folder 4: Social Relationship
+  'صديق': ['personal_item', 'friend'],
+  'عائلة': ['house', 'family', 'personal_item'],
+  'زميل عمل': ['office', 'hospital', 'school', 'coworker'],
+  'جار': ['house', 'neighbor'],
+  'غريب': ['outdoor', 'stranger', 'darkness'],
+  'شريك': ['personal_item', 'gold', 'partner'],
+
+  // Folder 5: Forensic Trace
+  'بصمة': ['fingerprint', 'crime_scene'],
+  'غبار / تربة': ['soil', 'dust', 'construction'],
+  'ماء': ['water', 'liquid'],
+  'حيوان': ['animal'],
+  'نبات': ['plant'],
+  'مسحوق': ['powder', 'chemical'],
+};
+
 // Helper to evaluate how many cards in play match a given clue option
 export function getClueMatchesCount(clueTagOrName: string, cardsInPlay: Card[]): number {
-  const normalized = clueTagOrName.toLowerCase().trim();
+  const clueNorm = clueTagOrName.trim();
+  const targetTags = TAG_MAP[clueNorm] || [clueNorm.toLowerCase()];
+
   return cardsInPlay.filter((card) => {
     return card.tags.some((tag) => {
       const tagNorm = tag.toLowerCase().trim();
-      return tagNorm.includes(normalized) || normalized.includes(tagNorm) || tagNorm === normalized;
+      return targetTags.some((t) => tagNorm.includes(t) || t.includes(tagNorm));
     });
   }).length;
 }

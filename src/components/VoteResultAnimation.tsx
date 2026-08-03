@@ -75,77 +75,32 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
           </h3>
         </div>
 
-        {/* Detailed Cards Validation with Camera Focus Zoom */}
-        <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-          {/* Weapon Card Check */}
-          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/90 shadow-2xl flex flex-col items-center justify-between space-y-4 overflow-hidden min-h-[160px]">
-            <span className="text-xs text-zinc-400 font-mono font-bold uppercase tracking-widest">
-              سلاح الجريمة المتهم
-            </span>
-            <span className="text-lg font-extrabold text-zinc-100 font-serif">{result.weaponName}</span>
-
-            {/* Cinematic Slamming Rubber Stamp */}
-            <div
-              className={`transition-all duration-200 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
-                stampPhase === 'entering'
-                  ? 'scale-[4.5] opacity-0 rotate-[-25deg]'
-                  : 'scale-100 opacity-100 rotate-[-6deg]'
-              }`}
-            >
-              {result.isWeaponCorrect ? (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/20 border-4 border-emerald-500 text-emerald-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-emerald-500/40">
-                  <CheckCircle className="w-6 h-6" /> CORRECT • صحيح
-                </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border-4 border-red-500 text-red-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-red-500/40">
-                  <XCircle className="w-6 h-6" /> WRONG • خاطئ
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Evidence Card Check */}
-          <div className="relative p-5 rounded-2xl border border-zinc-800 bg-zinc-900/90 shadow-2xl flex flex-col items-center justify-between space-y-4 overflow-hidden min-h-[160px]">
-            <span className="text-xs text-zinc-400 font-mono font-bold uppercase tracking-widest">
-              دليل مسرح الجريمة المتهم
-            </span>
-            <span className="text-lg font-extrabold text-zinc-100 font-serif">{result.evidenceName}</span>
-
-            {/* Cinematic Slamming Rubber Stamp */}
-            <div
-              className={`transition-all duration-200 delay-150 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
-                stampPhase === 'entering'
-                  ? 'scale-[4.5] opacity-0 rotate-[25deg]'
-                  : 'scale-100 opacity-100 rotate-[6deg]'
-              }`}
-            >
-              {result.isEvidenceCorrect ? (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/20 border-4 border-emerald-500 text-emerald-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-emerald-500/40">
-                  <CheckCircle className="w-6 h-6" /> CORRECT • صحيح
-                </div>
-              ) : (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-500/20 border-4 border-red-500 text-red-400 font-black text-base uppercase tracking-widest shadow-2xl shadow-red-500/40">
-                  <XCircle className="w-6 h-6" /> WRONG • خاطئ
-                </div>
-              )}
-            </div>
+        {/* Accused Summary Details */}
+        <div className="relative z-10 flex flex-col items-center justify-center p-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 space-y-1">
+          <div className="text-xs text-zinc-400 font-mono">
+            السلاح: <span className="text-zinc-200 font-bold">{result.weaponName}</span> • الدليل: <span className="text-zinc-200 font-bold">{result.evidenceName}</span>
           </div>
         </div>
 
-        {/* Overall Suspect Identity Verification Stamp */}
-        <div className="relative z-10 pt-4 border-t border-zinc-800 flex flex-col items-center justify-center space-y-2">
-          <span className="text-xs text-zinc-400 font-mono uppercase">
-            هوية المشتبه به الرئيس (القاتل):
-          </span>
-          {result.isKillerCorrect ? (
-            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-wider">
-              <Award className="w-4 h-4 text-emerald-400" /> تم تطابق هوية القاتل بنجاح!
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-xs uppercase tracking-wider">
-              <FileQuestion className="w-4 h-4 text-red-400" /> تم اتهام شخص بريء!
-            </div>
-          )}
+        {/* Single Slamming Stamp Result (CORRECT or WRONG only) */}
+        <div className="relative z-10 py-8 flex flex-col items-center justify-center overflow-hidden min-h-[140px]">
+          <div
+            className={`transition-all duration-300 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
+              stampPhase === 'entering'
+                ? 'scale-[5] opacity-0 rotate-[-30deg]'
+                : 'scale-100 opacity-100 rotate-[-5deg]'
+            }`}
+          >
+            {result.isFullyCorrect ? (
+              <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-emerald-500/20 border-4 border-emerald-500 text-emerald-400 font-black text-2xl md:text-3xl uppercase tracking-widest shadow-2xl shadow-emerald-500/50">
+                <CheckCircle className="w-8 h-8" /> CORRECT • صحيح
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-red-500/20 border-4 border-red-500 text-red-400 font-black text-2xl md:text-3xl uppercase tracking-widest shadow-2xl shadow-red-500/50">
+                <XCircle className="w-8 h-8" /> WRONG • خاطئ
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Close Button */}

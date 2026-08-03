@@ -15,7 +15,7 @@ class SoundEffects {
     }
   }
 
-  // Stamp Slam Thud Sound Effect
+  // Realistic Rubber Stamp Slam Sound Effect (Official Case File Stamp)
   playStampSlam() {
     try {
       this.init();
@@ -23,40 +23,60 @@ class SoundEffects {
 
       const now = this.ctx.currentTime;
 
-      // Sub bass thud
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(120, now);
-      osc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
-
-      gain.gain.setValueAtTime(1.0, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.3);
-
-      // Impact noise snap
-      const bufferSize = this.ctx.sampleRate * 0.1;
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+      // 1. Initial sharp rubber cushion impact snap (High-pass noise transient)
+      const clickBufferSize = Math.floor(this.ctx.sampleRate * 0.025);
+      const clickBuffer = this.ctx.createBuffer(1, clickBufferSize, this.ctx.sampleRate);
+      const clickData = clickBuffer.getChannelData(0);
+      for (let i = 0; i < clickBufferSize; i++) {
+        clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (clickBufferSize * 0.2));
       }
 
-      const noise = this.ctx.createBufferSource();
-      noise.buffer = buffer;
-      const noiseGain = this.ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.4, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      const clickSource = this.ctx.createBufferSource();
+      clickSource.buffer = clickBuffer;
 
-      noise.connect(noiseGain);
-      noiseGain.connect(this.ctx.destination);
+      const clickFilter = this.ctx.createBiquadFilter();
+      clickFilter.type = 'highpass';
+      clickFilter.frequency.setValueAtTime(1200, now);
 
-      noise.start(now);
+      const clickGain = this.ctx.createGain();
+      clickGain.gain.setValueAtTime(0.7, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+      clickSource.connect(clickFilter);
+      clickFilter.connect(clickGain);
+      clickGain.connect(this.ctx.destination);
+      clickSource.start(now);
+
+      // 2. Solid wooden handle pop / body resonance
+      const popOsc = this.ctx.createOscillator();
+      const popGain = this.ctx.createGain();
+      popOsc.type = 'triangle';
+      popOsc.frequency.setValueAtTime(450, now);
+      popOsc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
+
+      popGain.gain.setValueAtTime(0.6, now);
+      popGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+      popOsc.connect(popGain);
+      popGain.connect(this.ctx.destination);
+      popOsc.start(now);
+      popOsc.stop(now + 0.06);
+
+      // 3. Heavy solid desk thud (Low sine drop)
+      const thudOsc = this.ctx.createOscillator();
+      const thudGain = this.ctx.createGain();
+      thudOsc.type = 'sine';
+      thudOsc.frequency.setValueAtTime(160, now);
+      thudOsc.frequency.exponentialRampToValueAtTime(35, now + 0.15);
+
+      thudGain.gain.setValueAtTime(0.9, now);
+      thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+      thudOsc.connect(thudGain);
+      thudGain.connect(this.ctx.destination);
+
+      thudOsc.start(now);
+      thudOsc.stop(now + 0.18);
     } catch (e) {
       console.warn('Audio play error:', e);
     }

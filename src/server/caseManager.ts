@@ -398,16 +398,10 @@ export function killerSelectCards(code: string, killerId: string, weaponId: stri
   const now = Date.now();
   c.clueCycleStartTime = now;
 
-  const locClue = determineCrimeSceneLocation(chosenW.name, chosenW.tags);
-  const codClue = determineCauseOfDeath(chosenW.name, chosenW.tags);
-
-  c.confirmedClues = [
-    { folderIndex: 0, folderName: INVESTIGATION_FOLDERS[0].name, clueTag: locClue, confirmedAt: now },
-    { folderIndex: 1, folderName: INVESTIGATION_FOLDERS[1].name, clueTag: codClue, confirmedAt: now },
-  ];
+  c.confirmedClues = [];
 
   c.log.push(`قام القاتل بسريّة باختيار سلاح الجريمة والدليل.`);
-  c.log.push(`تم كشف الدليلين الدائمين تلقائياً: موقع الجريمة (${locClue}) وسبب الوفاة (${codClue}).`);
+  c.log.push(`انطلقت مرحلة التحقيق! يستطيع الطبيب الشرعي الآن اختيار وتأكيد أدلة التحقيق.`);
   return c;
 }
 
@@ -424,10 +418,6 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
   const c = getCase(code);
   if (!c) throw new Error('القضية غير موجودة');
   if (c.medicalExaminerId !== meId) throw new Error('يمكن للطبيب الشرعي فقط تأكيد الأدلة');
-
-  if (folderIndex === 0 || folderIndex === 1) {
-    throw new Error('الدليلان الأول والثاني دائمين ومكشوفين من بداية القضية');
-  }
 
   const now = Date.now();
   const duration = getClueCycleDuration(c.settings);
@@ -656,13 +646,8 @@ export function getClientState(caseCode: string, playerId: string): any {
       const pair = [c.killerId, c.accompliceId].sort();
       intel.witnessPair = pair;
     }
-  } else if (myRole === 'MEDICAL_EXAMINER') {
-    intel.killerId = c.killerId;
-    intel.accompliceId = c.accompliceId;
-    intel.selectedWeapon = c.selectedWeapon;
-    intel.selectedEvidence = c.selectedEvidence;
   } else {
-    // Investigators
+    // Medical Examiner & Investigators
     const meP = c.players.find((p) => p.role === 'MEDICAL_EXAMINER');
     if (meP) {
       intel.medicalExaminerPlayer = { id: meP.id, name: meP.name, avatar: meP.avatar };

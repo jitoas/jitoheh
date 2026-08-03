@@ -36,7 +36,7 @@ export const RoleHeaderPanel: React.FC<RoleHeaderPanelProps> = ({ state, myRole 
       </div>
 
       {/* Role-Specific Displays */}
-      {(myRole === 'KILLER' || myRole === 'ACCOMPLICE' || myRole === 'MEDICAL_EXAMINER') && (
+      {(myRole === 'KILLER' || myRole === 'ACCOMPLICE') && (
         <div className="space-y-3">
           <div className="flex items-center gap-4">
             {killerPlayer && (

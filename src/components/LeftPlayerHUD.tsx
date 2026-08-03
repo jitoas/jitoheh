@@ -9,6 +9,7 @@ interface LeftPlayerHUDProps {
   myProfile: PlayerProfile;
   onViewInventory: (targetPlayerId: string) => void;
   onOpenVoteModal: (targetPlayerId: string) => void;
+  isVotingOpen?: boolean;
 }
 
 export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
@@ -16,6 +17,7 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
   myProfile,
   onViewInventory,
   onOpenVoteModal,
+  isVotingOpen = false,
 }) => {
   const mePlayer = state.players.find((p) => p.id === myProfile.id);
   const myRole = mePlayer?.role;
@@ -428,7 +430,12 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                 {state.phase === 'INVESTIGATION' && !mePlayer?.hasVoted && myRole !== 'MEDICAL_EXAMINER' && (
                   <button
                     onClick={() => onOpenVoteModal(p.id)}
-                    className="flex items-center justify-center gap-1 py-1 px-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-[10px] font-extrabold uppercase tracking-wider transition-colors shadow-md shadow-red-600/30 cursor-pointer"
+                    disabled={isVotingOpen || mePlayer?.hasVoted}
+                    className={`flex items-center justify-center gap-1 py-1 px-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-colors shadow-md ${
+                      isVotingOpen || mePlayer?.hasVoted
+                        ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
+                        : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30 cursor-pointer'
+                    }`}
                   >
                     <Vote className="w-3 h-3" /> الاتهام
                   </button>
