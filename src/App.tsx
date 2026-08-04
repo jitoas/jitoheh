@@ -45,6 +45,7 @@ export default function App() {
   const [voteTargetPlayerId, setVoteTargetPlayerId] = useState<string | null>(null);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [isMyCardsOpen, setIsMyCardsOpen] = useState(false);
+  const [dismissedVoteId, setDismissedVoteId] = useState<string | null>(null);
 
   useEffect(() => {
     socket = io({
@@ -305,12 +306,18 @@ export default function App() {
       />
 
       {/* Vote Result Animation Overlay */}
-      <VoteResultAnimation
-        result={gameState.latestVoteResult}
-        onDismiss={() => {
-          // Cleared automatically
-        }}
-      />
+      {gameState.latestVoteResult && gameState.latestVoteResult.id && gameState.latestVoteResult.id !== dismissedVoteId && (
+        <VoteResultAnimation
+          result={gameState.latestVoteResult}
+          onDismiss={() => {
+            if (gameState.latestVoteResult?.id) {
+              setDismissedVoteId(gameState.latestVoteResult.id);
+            }
+            setIsVotingModalOpen(false);
+            setVoteTargetPlayerId(null);
+          }}
+        />
+      )}
 
       {/* Player Inventory Inspection Modal */}
       <PlayerInventoryModal
@@ -349,6 +356,8 @@ export default function App() {
           initialTargetPlayerId={voteTargetPlayerId || undefined}
           onClose={() => setIsVotingModalOpen(false)}
           onSubmitVote={(tId, wId, eId) => {
+            setIsVotingModalOpen(false);
+            setVoteTargetPlayerId(null);
             socket.emit('submit_vote', {
               caseCode: gameState.caseCode,
               voterId: profile.id,
@@ -470,9 +479,6 @@ export default function App() {
 
           {/* MAIN CENTER COLUMN: Core Gameplay & Board */}
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-6">
-            {/* Context Intel Header */}
-            <RoleHeaderPanel state={gameState} myRole={myRole} />
-
             {/* Killer Selection Phase Notice for non-Killers */}
             {gameState.phase === 'KILLER_SELECTION' && myRole !== 'KILLER' && (
               <div className="rounded-3xl border border-red-900/60 bg-gradient-to-r from-red-950/50 via-zinc-950 to-zinc-900 p-8 text-center shadow-2xl space-y-3 dir-rtl">
@@ -521,34 +527,8 @@ export default function App() {
                     customClueTimeSeconds={gameState.settings.customClueTimeSeconds}
                   />
                 )}
-
-                {/* Single My Cards Button Trigger Bar (Replaces permanent inventory panel) */}
-                {!isME && (gameState.myWeapons.length > 0 || gameState.myEvidence.length > 0) && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl border border-amber-500/30 bg-zinc-950/90 shadow-xl backdrop-blur-md dir-rtl">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
-                        <Layers className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-zinc-100 font-serif">بطاقاتي الشخصية المحفوظة</h4>
-                        <span className="text-[10px] text-zinc-400 font-mono block">4 أسلحة و4 أدلة سريّة بحوزتك</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setIsMyCardsOpen(true)}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold text-xs transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
-                    >
-                      <Layers className="w-4 h-4" />
-                      <span>عرض بطاقاتي (View Cards)</span>
-                    </button>
-                  </div>
-                )}
               </>
             )}
-
-            {/* Permanent Investigation Notebook Log (Positioned at bottom of main column) */}
-            <InvestigationLog log={gameState.log} />
           </div>
 
           {/* LEFT COLUMN: Role-Specific HUD */}

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { VoteResult } from '../types';
-import { CheckCircle, XCircle, ShieldAlert, Award, FileQuestion, Stamp } from 'lucide-react';
+import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
 import { sfx } from '../utils/audioSynth';
 
 interface VoteResultAnimationProps {
@@ -11,49 +11,67 @@ interface VoteResultAnimationProps {
 export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result, onDismiss }) => {
   const [stampPhase, setStampPhase] = useState<'entering' | 'slammed' | 'fading'>('entering');
   const [screenShake, setScreenShake] = useState(false);
+  const playedResultIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (result) {
-      setStampPhase('entering');
-      // Trigger camera zoom, slam stamp sound and screen shake after 350ms
-      const slamTimer = setTimeout(() => {
-        setStampPhase('slammed');
-        setScreenShake(true);
-        sfx.playStampSlam();
+    if (!result || !result.id) return;
+    
+    // Prevent re-running timers if this result ID has already been started
+    if (playedResultIdRef.current === result.id) {
+      return;
+    }
+    playedResultIdRef.current = result.id;
 
+    setStampPhase('entering');
+    setScreenShake(false);
+
+    // Step 1: Camera focuses -> Pause -> Slam stamp at 1200ms
+    const slamTimer = setTimeout(() => {
+      setStampPhase('slammed');
+      setScreenShake(true);
+      sfx.playStampSlam();
+
+      // Sound chime/buzz after slam impact
+      const soundTimer = setTimeout(() => {
         if (result.isFullyCorrect) {
-          setTimeout(() => sfx.playCorrectChime(), 250);
+          sfx.playCorrectChime();
         } else {
-          setTimeout(() => sfx.playWrongBuzz(), 250);
+          sfx.playWrongBuzz();
         }
-
-        setTimeout(() => setScreenShake(false), 350);
       }, 350);
 
-      // Start smooth fade out before dismiss
-      const fadeTimer = setTimeout(() => {
-        setStampPhase('fading');
-      }, 3800);
-
-      const dismissTimer = setTimeout(() => {
-        onDismiss();
-      }, 4400);
+      const shakeTimer = setTimeout(() => setScreenShake(false), 500);
 
       return () => {
-        clearTimeout(slamTimer);
-        clearTimeout(fadeTimer);
-        clearTimeout(dismissTimer);
+        clearTimeout(soundTimer);
+        clearTimeout(shakeTimer);
       };
-    }
-  }, [result, onDismiss]);
+    }, 1200);
+
+    // Step 2: Dramatic hold pause -> Start fade out at 5500ms
+    const fadeTimer = setTimeout(() => {
+      setStampPhase('fading');
+    }, 5500);
+
+    // Step 3: Destroy voting UI & clear state at 6200ms
+    const dismissTimer = setTimeout(() => {
+      onDismiss();
+    }, 6200);
+
+    return () => {
+      clearTimeout(slamTimer);
+      clearTimeout(fadeTimer);
+      clearTimeout(dismissTimer);
+    };
+  }, [result?.id, onDismiss]);
 
   if (!result) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4 transition-all duration-500 dir-rtl ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4 transition-all duration-700 dir-rtl ${
         stampPhase === 'fading' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-      } ${screenShake ? 'translate-x-2 translate-y-2' : ''}`}
+      } ${screenShake ? 'translate-x-3 translate-y-3 -rotate-1' : ''}`}
     >
       <div
         className={`w-full max-w-2xl rounded-3xl border-2 border-zinc-800 bg-gradient-to-b from-zinc-950 via-zinc-900 to-black p-8 text-center shadow-2xl relative overflow-hidden space-y-6 text-right transition-transform duration-700 ${
@@ -65,7 +83,7 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
 
         {/* Vintage Top Dossier Stamp Header */}
         <div className="relative z-10 space-y-2 border-b border-zinc-800 pb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider animate-pulse">
             <ShieldAlert className="w-4 h-4" /> نتيجة فحص وتوثيق الاتهام الجنائي
           </div>
 
@@ -85,9 +103,9 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
         {/* Single Slamming Stamp Result (CORRECT or WRONG only) */}
         <div className="relative z-10 py-8 flex flex-col items-center justify-center overflow-hidden min-h-[140px]">
           <div
-            className={`transition-all duration-300 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
+            className={`transition-all duration-500 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
               stampPhase === 'entering'
-                ? 'scale-[5] opacity-0 rotate-[-30deg]'
+                ? 'scale-[6] opacity-0 rotate-[-45deg]'
                 : 'scale-100 opacity-100 rotate-[-5deg]'
             }`}
           >
@@ -116,5 +134,3 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
     </div>
   );
 };
-
-

@@ -519,6 +519,7 @@ export function submitVote(
   const isFullyCorrect = isWeaponCorrect && isEvidenceCorrect && isKillerCorrect;
 
   const result: VoteResult = {
+    id: `vote_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     voterName: voter.name,
     targetPlayerName: targetPlayer.name,
     weaponName: targetWeapon.name,

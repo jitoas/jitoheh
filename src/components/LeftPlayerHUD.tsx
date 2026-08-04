@@ -272,11 +272,11 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
   // If player is Witness: Show ONLY Killer & Accomplice in shuffled order
   if (isWitness) {
     return (
-      <div className="rounded-3xl border border-purple-900/40 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 p-4 shadow-2xl flex flex-col space-y-3 dir-rtl text-right">
+      <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl flex flex-col space-y-3 dir-rtl text-right">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-400">
+            <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-amber-400">
               <EyeOff className="w-4 h-4" />
             </div>
             <div>
@@ -286,12 +286,12 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
               <span className="text-[9px] text-zinc-500 font-mono">WITNESS INTEL (2)</span>
             </div>
           </div>
-          <span className="text-[9px] font-bold text-purple-400 bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono">
+          <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono">
             ترتيب عشوائي
           </span>
         </div>
 
-        <p className="text-[10px] text-zinc-400 leading-tight">
+        <p className="text-[10px] text-zinc-400 leading-tight font-serif">
           أنت تشاهد القاتل وشريكه، لكن ترتيبهما عشوائي تماماً ولا تعرِف أيهما القاتل الحقيقي!
         </p>
 
@@ -303,20 +303,20 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
             return (
               <div
                 key={p.id}
-                className="p-3.5 rounded-2xl border border-purple-900/60 bg-purple-950/20 hover:border-purple-600 transition-all flex items-center justify-between gap-3 shadow-lg"
+                className="p-3.5 rounded-2xl border border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 transition-all flex items-center justify-between gap-3 shadow-lg"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-base text-white shadow-lg shrink-0 ${
-                      avatarPreset ? avatarPreset.bg : 'bg-purple-900'
+                      avatarPreset ? avatarPreset.bg : 'bg-zinc-800'
                     }`}
-                    style={{ border: `2px solid ${avatarPreset ? avatarPreset.color : '#a855f7'}` }}
+                    style={{ border: `2px solid ${avatarPreset ? avatarPreset.color : '#f59e0b'}` }}
                   >
                     {p.name.charAt(0)}
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-zinc-100 font-serif">{p.name}</h4>
-                    <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20 font-mono inline-block mt-0.5">
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-mono inline-block mt-0.5">
                       مشتبه به رئيسي #{idx + 1}
                     </span>
                   </div>
@@ -324,9 +324,9 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
 
                 <button
                   onClick={() => onViewInventory(p.id)}
-                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-200 text-[10px] font-bold transition-colors cursor-pointer shrink-0"
+                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-bold transition-colors cursor-pointer shrink-0"
                 >
-                  <Eye className="w-3 h-3 text-purple-300" /> أدلة
+                  <Eye className="w-3 h-3 text-amber-400" /> أدلة
                 </button>
               </div>
             );
@@ -338,11 +338,11 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
 
   // Default for Investigator: Show all suspects (every player except ME)
   return (
-    <div className="rounded-3xl border border-zinc-800 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 p-4 shadow-2xl flex flex-col space-y-3 dir-rtl text-right">
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl flex flex-col space-y-3 dir-rtl text-right">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-red-500/20 border border-red-500/40 text-red-400">
+          <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-amber-400">
             <ShieldAlert className="w-4 h-4" />
           </div>
           <div>

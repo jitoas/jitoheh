@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ConfirmedClue, CaseSettings } from '../types';
 import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
-import { ShieldAlert, CheckCircle2, Clock, Lock, Sparkles } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, Clock, Lock, Sparkles, Unlock } from 'lucide-react';
 
 interface ClueBoardProps {
   clues: ConfirmedClue[];
@@ -118,15 +118,17 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
                     </span>
                   </div>
                 ) : isUnlocked ? (
-                  <div className="mt-3 p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-center animate-pulse">
-                    <span className="text-xs font-mono text-emerald-400 block font-bold">
-                      🔓 متاح الآن — الطبيب الشرعي يختار الدليل...
+                  <div className="mt-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center animate-pulse">
+                    <span className="text-xs font-mono text-amber-400 font-bold flex items-center justify-center gap-1.5">
+                      <Unlock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>متاح الآن — الطبيب الشرعي يختار الدليل...</span>
                     </span>
                   </div>
                 ) : (
-                  <div className="mt-3 p-3 rounded-xl border border-dashed border-zinc-800/80 bg-black/40 text-center">
-                    <span className="text-xs font-mono text-amber-400 block font-semibold">
-                      ⏳ ينكشف بعد ({formatTime(remainingTime)})
+                  <div className="mt-3 p-3 rounded-xl border border-dashed border-zinc-800 bg-zinc-950 text-center">
+                    <span className="text-xs font-mono text-amber-400 font-semibold flex items-center justify-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>ينكشف بعد ({formatTime(remainingTime)})</span>
                     </span>
                   </div>
                 )}

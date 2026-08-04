@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ClientGameState, Card } from '../types';
 import { INVESTIGATION_FOLDERS, getClueMatchesCount, getSlotTimerDuration } from '../data/clues';
-import { Folder, FolderOpen, CheckCircle, Unlock, Clock, Send, AlertCircle } from 'lucide-react';
+import { Folder, FolderOpen, CheckCircle, Unlock, Clock, Send, AlertCircle, X, ChevronUp, ChevronDown, Lock } from 'lucide-react';
 
 interface MedicalExaminerInterfaceProps {
   state: ClientGameState;
@@ -177,8 +177,23 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   )}
                 </div>
 
-                <span className="text-[11px] font-mono text-amber-400 group-hover:translate-x-1 transition-transform">
-                  {isOpen ? 'إغلاق الملف ▲' : isUnlocked ? 'فتح الملف ▼' : `مغلق 🔒 (${formatTime(remaining)})`}
+                <span className="text-[11px] font-mono text-amber-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                  {isOpen ? (
+                    <>
+                      <span>إغلاق الملف</span>
+                      <ChevronUp className="w-3 h-3" />
+                    </>
+                  ) : isUnlocked ? (
+                    <>
+                      <span>فتح الملف</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3 h-3 text-amber-400 inline" />
+                      <span>مغلق ({formatTime(remaining)})</span>
+                    </>
+                  )}
                 </span>
               </div>
             </div>
@@ -201,9 +216,10 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
 
             <button
               onClick={() => setActiveFolderId(null)}
-              className="text-xs text-zinc-400 hover:text-zinc-200"
+              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
             >
-              ✕ إغلاق الملف
+              <X className="w-4 h-4" />
+              <span>إغلاق الملف</span>
             </button>
           </div>
 

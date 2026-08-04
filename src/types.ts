@@ -64,6 +64,7 @@ export interface VoteData {
 }
 
 export interface VoteResult {
+  id: string;
   voterName: string;
   targetPlayerName: string;
   weaponName: string;
