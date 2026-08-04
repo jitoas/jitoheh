@@ -23,9 +23,9 @@ export const CardArt: React.FC<CardArtProps> = ({ card, className = '', size = '
   const imageUrl = getCardImageUrl(card);
 
   const sizeClasses = {
-    sm: 'w-24 h-36 text-xs',
-    md: 'w-36 h-52 text-sm',
-    lg: 'w-48 h-72 text-base',
+    sm: 'w-32 h-48 sm:w-36 sm:h-52 text-xs',
+    md: 'w-44 h-64 sm:w-52 sm:h-76 text-sm',
+    lg: 'w-60 h-88 sm:w-64 sm:h-96 text-base',
   };
 
   return (

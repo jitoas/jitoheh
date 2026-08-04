@@ -47,7 +47,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 overflow-y-auto dir-rtl">
-      <div className="w-full max-w-4xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/90 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto scrollbar-thin text-right">
+      <div className="w-full max-w-5xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/90 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto scrollbar-thin text-right">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-3">

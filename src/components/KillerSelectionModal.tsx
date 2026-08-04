@@ -21,7 +21,7 @@ export const KillerSelectionModal: React.FC<KillerSelectionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/80 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6">
+      <div className="w-full max-w-5xl rounded-3xl border border-red-900/60 bg-gradient-to-b from-red-950/80 via-zinc-950 to-black p-6 md:p-8 shadow-2xl space-y-6">
         <div className="text-center space-y-2 border-b border-zinc-800 pb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-widest">
             <Skull className="w-4 h-4" /> اختيار مسرح الجريمة للقاتل

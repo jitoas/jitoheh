@@ -20,7 +20,7 @@ export const PlayerInventoryModal: React.FC<PlayerInventoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto scrollbar-thin">
+      <div className="w-full max-w-5xl rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto scrollbar-thin">
         <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500 flex items-center justify-center font-bold text-amber-400">
