@@ -31,19 +31,37 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
   // Suspects list (every player EXCEPT Medical Examiner)
   const suspectPlayers = state.players.filter((p) => p.role !== 'MEDICAL_EXAMINER');
 
-  // Witness specific suspects: ONLY Killer & Accomplice, deterministically shuffled
+  // Witness specific suspects: ONLY Killer & Accomplice, using state.intel.witnessPair
   const witnessSuspects = useMemo(() => {
     if (!isWitness) return [];
+
+    // 1. Primary source: state.intel.witnessPair provided by server
+    if (state.intel?.witnessPair && state.intel.witnessPair.length > 0) {
+      return state.intel.witnessPair
+        .map((id: string) => state.players.find((p) => p.id === id))
+        .filter((p): p is typeof state.players[0] => p !== undefined);
+    }
+
+    // 2. Fallback: state.intel killerId/accompliceId
+    const culpritIds = [state.intel?.killerId, state.intel?.accompliceId].filter(
+      (id): id is string => Boolean(id)
+    );
+    if (culpritIds.length > 0) {
+      return culpritIds
+        .map((id) => state.players.find((p) => p.id === id))
+        .filter((p): p is typeof state.players[0] => p !== undefined);
+    }
+
+    // 3. Fallback if roles unmasked (e.g. END_GAME)
     const culprits = state.players.filter(
       (p) => p.role === 'KILLER' || p.role === 'ACCOMPLICE'
     );
-    // Shuffle deterministically based on caseCode so order is random per match but stable across re-renders
     return [...culprits].sort((a, b) => {
       const hashA = (state.caseCode + a.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const hashB = (state.caseCode + b.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
       return hashA - hashB;
     });
-  }, [state.players, state.caseCode, isWitness]);
+  }, [state.players, state.intel, state.caseCode, isWitness]);
 
   // If player is Medical Examiner: Show large self profile card on LEFT side
   if (isME && mePlayer) {

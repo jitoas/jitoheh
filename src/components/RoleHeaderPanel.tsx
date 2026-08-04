@@ -73,18 +73,26 @@ export const RoleHeaderPanel: React.FC<RoleHeaderPanelProps> = ({ state, myRole 
         </div>
       )}
 
-      {myRole === 'WITNESS' && state.intel.witnessPair && (
+      {myRole === 'WITNESS' && state.intel?.witnessPair && (
         <div>
           <span className="text-[10px] text-sky-400 uppercase font-bold block mb-1">
             Suspect Pair (Killer & Accomplice)
           </span>
           <div className="flex items-center gap-3">
-            {state.intel.witnessPair.map((id) => {
+            {state.intel.witnessPair.map((id: string) => {
               const p = getPlayer(id);
               if (!p) return null;
+              const avatarPreset = DETECTIVE_AVATARS.find((a) => a.id === p.avatar);
               return (
-                <div key={id} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800">
-                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+                <div key={id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-sky-500/30">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs text-white ${
+                      avatarPreset ? avatarPreset.bg : 'bg-zinc-800'
+                    }`}
+                    style={{ border: `1.5px solid ${avatarPreset ? avatarPreset.color : '#38bdf8'}` }}
+                  >
+                    {p.name.charAt(0)}
+                  </div>
                   <span className="text-xs font-semibold text-zinc-200">{p.name}</span>
                 </div>
               );

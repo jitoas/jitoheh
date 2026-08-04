@@ -712,10 +712,18 @@ export function getClientState(caseCode: string, playerId: string): any {
     intel.selectedEvidence = c.selectedEvidence;
   } else if (myRole === 'WITNESS') {
     // Witness knows Killer & Accomplice, but NOT which is which! Randomize order!
-    if (c.killerId && c.accompliceId) {
-      const pair = [c.killerId, c.accompliceId].sort();
-      intel.witnessPair = pair;
+    const pair: string[] = [];
+    if (c.killerId) pair.push(c.killerId);
+    if (c.accompliceId) pair.push(c.accompliceId);
+
+    if (pair.length === 2) {
+      // Deterministically shuffle order per match based on caseCode so it's random per game but stable across state refreshes
+      const hash0 = (c.caseCode + pair[0]).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      if (hash0 % 2 === 1) {
+        pair.reverse();
+      }
     }
+    intel.witnessPair = pair;
   } else {
     // Medical Examiner & Investigators
     const meP = c.players.find((p) => p.role === 'MEDICAL_EXAMINER');
