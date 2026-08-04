@@ -26,40 +26,35 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
     }
     playedResultIdRef.current = result.id;
 
-    setCardsRevealed(false);
+    setCardsRevealed(true);
     setStampPhase('entering');
     setScreenShake(false);
 
-    // 1. Reveal selected cards (Evidence left, Weapon right)
-    const cardRevealTimer = setTimeout(() => {
-      setCardsRevealed(true);
-    }, 400);
-
-    // 2. Slam stamp at 1800ms
+    // Step 1 & 2: Selected Weapon & Evidence are already visible on screen
+    // Step 3 & 4: At 800ms, play Stamp sound and SLAM the large rubber stamp instantly onto screen
     const slamTimer = setTimeout(() => {
       setStampPhase('slammed');
       setScreenShake(true);
       sfx.playStampSound();
 
-      const shakeTimer = setTimeout(() => setScreenShake(false), 500);
+      const shakeTimer = setTimeout(() => setScreenShake(false), 400);
 
       return () => {
         clearTimeout(shakeTimer);
       };
-    }, 1800);
+    }, 800);
 
-    // 3. Dramatic hold -> Fade out at 5800ms
+    // Hold visible before fading out
     const fadeTimer = setTimeout(() => {
       setStampPhase('fading');
-    }, 5800);
+    }, 4500);
 
-    // 4. Dismiss modal at 6400ms
+    // Dismiss modal
     const dismissTimer = setTimeout(() => {
       onDismiss();
-    }, 6400);
+    }, 5000);
 
     return () => {
-      clearTimeout(cardRevealTimer);
       clearTimeout(slamTimer);
       clearTimeout(fadeTimer);
       clearTimeout(dismissTimer);
@@ -160,28 +155,24 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
           </div>
 
           {/* Rubber Stamp Slam Overlay (Centered over cards) */}
-          {stampPhase !== 'entering' && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <div
-                className={`transition-all duration-300 cubic-bezier(0.175, 0.885, 0.32, 1.275) transform ${
-                  stampPhase === 'slammed' ? 'scale-100 opacity-100 rotate-[-8deg]' : 'scale-95 opacity-0'
-                }`}
-              >
+          {stampPhase === 'slammed' && (
+            <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+              <div className="animate-[stampSlam_0.15s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards] transform -rotate-12">
                 {result.isFullyCorrect ? (
-                  <div className="inline-flex flex-col items-center justify-center px-8 py-5 sm:px-12 sm:py-6 rounded-3xl bg-emerald-950/95 border-8 border-emerald-500 text-emerald-400 shadow-[0_0_60px_rgba(16,185,129,0.6)]">
-                    <div className="flex items-center gap-3 text-3xl sm:text-5xl font-black uppercase tracking-widest font-mono">
-                      <CheckCircle className="w-10 h-10 sm:w-14 sm:h-14 stroke-[3]" /> CORRECT
+                  <div className="inline-flex flex-col items-center justify-center px-10 py-6 sm:px-14 sm:py-8 rounded-2xl bg-emerald-950/90 border-8 border-dashed border-emerald-500 text-emerald-400 shadow-[0_0_80px_rgba(16,185,129,0.8)] outline outline-4 outline-emerald-500 outline-offset-4">
+                    <div className="flex items-center gap-4 text-4xl sm:text-6xl font-black uppercase tracking-widest font-mono">
+                      <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 stroke-[3.5]" /> CORRECT
                     </div>
-                    <div className="text-lg sm:text-2xl font-extrabold tracking-widest text-emerald-300 pt-1 font-serif">
+                    <div className="text-xl sm:text-3xl font-black tracking-widest text-emerald-300 pt-2 font-serif">
                       صحيح
                     </div>
                   </div>
                 ) : (
-                  <div className="inline-flex flex-col items-center justify-center px-8 py-5 sm:px-12 sm:py-6 rounded-3xl bg-red-950/95 border-8 border-red-600 text-red-500 shadow-[0_0_60px_rgba(239,68,68,0.6)]">
-                    <div className="flex items-center gap-3 text-3xl sm:text-5xl font-black uppercase tracking-widest font-mono">
-                      <XCircle className="w-10 h-10 sm:w-14 sm:h-14 stroke-[3]" /> WRONG
+                  <div className="inline-flex flex-col items-center justify-center px-10 py-6 sm:px-14 sm:py-8 rounded-2xl bg-red-950/90 border-8 border-dashed border-red-600 text-red-500 shadow-[0_0_80px_rgba(239,68,68,0.8)] outline outline-4 outline-red-600 outline-offset-4">
+                    <div className="flex items-center gap-4 text-4xl sm:text-6xl font-black uppercase tracking-widest font-mono">
+                      <XCircle className="w-12 h-12 sm:w-16 sm:h-16 stroke-[3.5]" /> WRONG
                     </div>
-                    <div className="text-lg sm:text-2xl font-extrabold tracking-widest text-red-300 pt-1 font-serif">
+                    <div className="text-xl sm:text-3xl font-black tracking-widest text-red-300 pt-2 font-serif">
                       خاطئ
                     </div>
                   </div>

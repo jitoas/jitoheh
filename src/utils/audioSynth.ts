@@ -3,6 +3,20 @@
 class SoundEffects {
   private ctx: AudioContext | null = null;
 
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const unlock = () => {
+        this.init();
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      };
+      window.addEventListener('click', unlock, { capture: true });
+      window.addEventListener('touchstart', unlock, { capture: true });
+      window.addEventListener('keydown', unlock, { capture: true });
+    }
+  }
+
   private init() {
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -11,38 +25,39 @@ class SoundEffects {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
   }
 
-  // 1. Stamp Sound: 814249__mihacappy__stamp_4presses_paperwav-old-mechanical-stamp-pressing-four-times-paper-hits.wav
-  // Old mechanical stamp pressing four times, paper hits.
-  // Plays ONLY when a player confirms a vote.
+  // Stamp Sound: Real mechanical rubber stamp slam on paper
   playStampSound() {
     try {
       this.init();
       if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
 
       const now = this.ctx.currentTime;
 
-      // 4 Presses sequence timing: t = 0s, 0.12s, 0.24s, 0.38s (final heavy slam)
+      // 4 Presses sequence timing: t = 0s, 0.08s, 0.16s, 0.28s (final heavy slam)
       const presses = [
         { time: now + 0.0, volume: 0.4, pitch: 350 },
-        { time: now + 0.11, volume: 0.5, pitch: 380 },
-        { time: now + 0.22, volume: 0.55, pitch: 400 },
-        { time: now + 0.35, volume: 0.9, pitch: 180 }, // Final heavy paper slam
+        { time: now + 0.08, volume: 0.5, pitch: 380 },
+        { time: now + 0.16, volume: 0.6, pitch: 400 },
+        { time: now + 0.28, volume: 1.0, pitch: 120 }, // Final heavy impact slam
       ];
 
       presses.forEach((p, idx) => {
         if (!this.ctx) return;
 
         // Mechanical click / paper hit noise
-        const noiseLen = idx === 3 ? 0.08 : 0.03;
+        const noiseLen = idx === 3 ? 0.12 : 0.03;
         const bufferSize = Math.floor(this.ctx.sampleRate * noiseLen);
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
         }
 
         const noiseSource = this.ctx.createBufferSource();
@@ -50,7 +65,7 @@ class SoundEffects {
 
         const filter = this.ctx.createBiquadFilter();
         filter.type = idx === 3 ? 'lowpass' : 'bandpass';
-        filter.frequency.setValueAtTime(idx === 3 ? 800 : 2200, p.time);
+        filter.frequency.setValueAtTime(idx === 3 ? 600 : 2200, p.time);
 
         const noiseGain = this.ctx.createGain();
         noiseGain.gain.setValueAtTime(p.volume, p.time);
@@ -61,20 +76,20 @@ class SoundEffects {
         noiseGain.connect(this.ctx.destination);
         noiseSource.start(p.time);
 
-        // Body pop / thud
+        // Heavy body thud for stamp impact
         const osc = this.ctx.createOscillator();
         const oscGain = this.ctx.createGain();
         osc.type = idx === 3 ? 'sine' : 'triangle';
         osc.frequency.setValueAtTime(p.pitch, p.time);
-        osc.frequency.exponentialRampToValueAtTime(idx === 3 ? 40 : 120, p.time + (idx === 3 ? 0.15 : 0.04));
+        osc.frequency.exponentialRampToValueAtTime(idx === 3 ? 35 : 100, p.time + (idx === 3 ? 0.2 : 0.04));
 
-        oscGain.gain.setValueAtTime(p.volume * (idx === 3 ? 0.9 : 0.4), p.time);
-        oscGain.gain.exponentialRampToValueAtTime(0.001, p.time + (idx === 3 ? 0.16 : 0.05));
+        oscGain.gain.setValueAtTime(p.volume * (idx === 3 ? 1.0 : 0.4), p.time);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, p.time + (idx === 3 ? 0.22 : 0.05));
 
         osc.connect(oscGain);
         oscGain.connect(this.ctx.destination);
         osc.start(p.time);
-        osc.stop(p.time + (idx === 3 ? 0.16 : 0.05));
+        osc.stop(p.time + (idx === 3 ? 0.22 : 0.05));
       });
     } catch (e) {
       console.warn('Audio play error:', e);
