@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ClientGameState, Card } from '../types';
 import { INVESTIGATION_FOLDERS, getClueMatchesCount, getSlotTimerDuration } from '../data/clues';
 import { Folder, FolderOpen, CheckCircle, Unlock, Clock, Send, AlertCircle, X, ChevronUp, ChevronDown, Lock } from 'lucide-react';
+import { sfx } from '../utils/audioSynth';
 
 interface MedicalExaminerInterfaceProps {
   state: ClientGameState;
@@ -238,7 +239,10 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                 return (
                   <button
                     key={option}
-                    onClick={() => onSelectDraftClue(activeFolder.id, option)}
+                    onClick={() => {
+                      sfx.playDarkWhisper();
+                      onSelectDraftClue(activeFolder.id, option);
+                    }}
                     className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                       isSelected
                         ? 'border-yellow-400 bg-yellow-400/20 ring-2 ring-yellow-400/40 shadow-lg shadow-yellow-400/10'
@@ -274,7 +278,10 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                 return (
                   <button
                     key={option}
-                    onClick={() => onSelectDraftClue(activeFolder.id, option)}
+                    onClick={() => {
+                      sfx.playDarkWhisper();
+                      onSelectDraftClue(activeFolder.id, option);
+                    }}
                     className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
                       isSelected
                         ? 'border-yellow-400 bg-yellow-400/20 ring-2 ring-yellow-400/40 shadow-lg shadow-yellow-400/10'
@@ -309,6 +316,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
               disabled={!draftClues[activeFolder.id]}
               onClick={() => {
                 if (draftClues[activeFolder.id]) {
+                  sfx.playDarkWhisper();
                   onConfirmClue(activeFolder.id);
                   setActiveFolderId(null);
                 }

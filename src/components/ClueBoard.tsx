@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ConfirmedClue, CaseSettings, ClueFolder } from '../types';
 import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
 import { ShieldAlert, CheckCircle2, Clock, Lock, Sparkles, Unlock } from 'lucide-react';
+import { sfx } from '../utils/audioSynth';
 
 interface ClueBoardProps {
   clues: ConfirmedClue[];
@@ -23,11 +24,20 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
   customClueTimeSeconds,
 }) => {
   const [now, setNow] = useState<number>(Date.now());
+  const prevCluesKeyRef = useRef<string>('');
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const currentKey = clues.map((c) => `${c.folderIndex}:${c.clueTag}`).join('|');
+    if (prevCluesKeyRef.current && prevCluesKeyRef.current !== currentKey) {
+      sfx.playDarkWhisper();
+    }
+    prevCluesKeyRef.current = currentKey;
+  }, [clues]);
 
   const activeSettings = {
     clueReleaseSpeed: settings?.clueReleaseSpeed || clueReleaseSpeed || 'normal',
