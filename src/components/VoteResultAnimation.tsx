@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { VoteResult, Card } from '../types';
 import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
+import { sfx } from '../utils/audioSynth';
 import { WEAPONS_DATABASE } from '../data/weapons';
 import { EVIDENCE_DATABASE } from '../data/evidence';
 import { getCardImageUrl } from '../data/cardArtImages';
@@ -38,6 +39,7 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
     const slamTimer = setTimeout(() => {
       setStampPhase('slammed');
       setScreenShake(true);
+      sfx.playStampSound();
 
       const shakeTimer = setTimeout(() => setScreenShake(false), 500);
 
