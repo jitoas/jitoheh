@@ -150,6 +150,7 @@ export interface ClientGameState {
   myRole: Role | null;
   myWeapons: Card[];
   myEvidence: Card[];
+  medicalExaminerId?: string | null;
   // Intel depending on role:
   intel: {
     killerId?: string;

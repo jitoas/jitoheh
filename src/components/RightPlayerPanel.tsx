@@ -21,8 +21,12 @@ export const RightPlayerPanel: React.FC<RightPlayerPanelProps> = ({
   const mePlayer = state.players.find((p) => p.id === myProfile.id);
   const myRole = mePlayer?.role;
 
+  const meId = state.medicalExaminerId || state.intel?.medicalExaminerPlayer?.id;
+
   // Exclude Medical Examiner from the right-side list (since ME already has a large portrait on the left)
-  const suspects = state.players.filter((p) => p.role !== 'MEDICAL_EXAMINER');
+  const suspects = state.players.filter(
+    (p) => p.role !== 'MEDICAL_EXAMINER' && p.id !== meId
+  );
 
   return (
     <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl flex flex-col space-y-3 dir-rtl text-right">

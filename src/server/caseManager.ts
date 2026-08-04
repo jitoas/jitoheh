@@ -694,11 +694,15 @@ export function getClientState(caseCode: string, playerId: string): any {
       isConnected: p.isConnected,
       weapons: p.weapons,
       evidence: p.evidence,
-      role: isSelf || isEnd ? p.role : undefined,
+      role: isSelf || isEnd || p.role === 'MEDICAL_EXAMINER' ? p.role : undefined,
     };
   });
 
+  const meP = c.players.find((p) => p.role === 'MEDICAL_EXAMINER');
   const intel: any = {};
+  if (meP) {
+    intel.medicalExaminerPlayer = { id: meP.id, name: meP.name, avatar: meP.avatar };
+  }
 
   if (myRole === 'KILLER') {
     intel.killerId = c.killerId;
@@ -724,12 +728,6 @@ export function getClientState(caseCode: string, playerId: string): any {
       }
     }
     intel.witnessPair = pair;
-  } else {
-    // Medical Examiner & Investigators
-    const meP = c.players.find((p) => p.role === 'MEDICAL_EXAMINER');
-    if (meP) {
-      intel.medicalExaminerPlayer = { id: meP.id, name: meP.name, avatar: meP.avatar };
-    }
   }
 
   return {
@@ -742,6 +740,7 @@ export function getClientState(caseCode: string, playerId: string): any {
     myRole,
     myWeapons: mePlayer?.weapons || [],
     myEvidence: mePlayer?.evidence || [],
+    medicalExaminerId: c.medicalExaminerId,
     intel,
     confirmedClues: c.confirmedClues,
     folders: c.folders || INVESTIGATION_FOLDERS,
