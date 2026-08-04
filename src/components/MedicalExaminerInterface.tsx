@@ -58,7 +58,8 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
     cardsInPlay.push(...p.weapons, ...p.evidence);
   });
 
-  const activeFolder = activeFolderId !== null ? INVESTIGATION_FOLDERS.find((f) => f.id === activeFolderId) : null;
+  const activeFolders = state.folders || INVESTIGATION_FOLDERS;
+  const activeFolder = activeFolderId !== null ? activeFolders.find((f) => f.id === activeFolderId) : null;
   const activeFolderUnlocked = activeFolderId !== null ? isFolderUnlocked(activeFolderId) : false;
   const draftClues = state.meDraftClues || {};
   const confirmedClues = state.confirmedClues || [];
@@ -97,7 +98,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
 
       {/* 6 Realistic Investigation Folders */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {INVESTIGATION_FOLDERS.map((folder) => {
+        {activeFolders.map((folder) => {
           const isConfirmed = confirmedClues.some((cc) => cc.folderIndex === folder.id);
           const confirmedClue = confirmedClues.find((cc) => cc.folderIndex === folder.id);
           const draftClue = draftClues[folder.id];

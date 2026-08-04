@@ -520,6 +520,7 @@ export default function App() {
                 ) : (
                   <ClueBoard
                     clues={gameState.confirmedClues}
+                    folders={gameState.folders}
                     clueCycleStartTime={gameState.clueCycleStartTime}
                     slotStartTimes={gameState.slotStartTimes}
                     settings={gameState.settings}

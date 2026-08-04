@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ConfirmedClue, CaseSettings } from '../types';
+import { ConfirmedClue, CaseSettings, ClueFolder } from '../types';
 import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
 import { ShieldAlert, CheckCircle2, Clock, Lock, Sparkles, Unlock } from 'lucide-react';
 
 interface ClueBoardProps {
   clues: ConfirmedClue[];
+  folders?: ClueFolder[];
   clueCycleStartTime?: number | null;
   slotStartTimes?: Record<number, number>;
   settings?: CaseSettings;
@@ -14,6 +15,7 @@ interface ClueBoardProps {
 
 export const ClueBoard: React.FC<ClueBoardProps> = ({
   clues,
+  folders,
   clueCycleStartTime,
   slotStartTimes,
   settings,
@@ -72,7 +74,7 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
 
       {/* 6-Folder Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 dir-ltr">
-        {INVESTIGATION_FOLDERS.map((folder, folderIdx) => {
+        {(folders || INVESTIGATION_FOLDERS).map((folder, folderIdx) => {
           const isPermanent = folderIdx === 0 || folderIdx === 1;
           const confirmedClue = clues.find((c) => c.folderIndex === folderIdx);
           const remainingTime = getSlotTimeLeft(folderIdx);

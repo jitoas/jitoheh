@@ -1,7 +1,7 @@
 import { Card, CaseState, CaseSettings, Player, Role, VoteResult, ConfirmedClue } from '../types';
 import { WEAPONS_DATABASE } from '../data/weapons';
 import { EVIDENCE_DATABASE } from '../data/evidence';
-import { INVESTIGATION_FOLDERS, getSlotTimerDuration } from '../data/clues';
+import { INVESTIGATION_FOLDERS, generateClueFolders, getSlotTimerDuration } from '../data/clues';
 import { getRandomEvent } from '../data/events';
 
 const casesMap = new Map<string, CaseState>();
@@ -68,6 +68,7 @@ export function createCase(hostProfile: { id: string; name: string; avatar: stri
     jokerVotedOut: false,
     jokerTargetKillerGuess: null,
     confirmedClues: [],
+    folders: generateClueFolders(),
     clueCycleStartTime: null,
     meDraftClues: {},
     meChangedClueCount: 0,
@@ -211,6 +212,27 @@ export function kickPlayer(code: string, hostId: string, targetPlayerId: string)
   if (target) {
     c.players = c.players.filter((p) => p.id !== targetPlayerId);
     c.log.push(`قام المضيف بطرد ${target.name} من القضية.`);
+
+    if (c.phase === 'INVESTIGATION') {
+      const activeUnvoted = c.players.filter(
+        (p) => p.role !== 'MEDICAL_EXAMINER' && !p.hasVoted
+      );
+      const nonKillerTeamUnvoted = activeUnvoted.filter(
+        (p) => p.role !== 'KILLER' && p.role !== 'ACCOMPLICE' && p.id !== c.killerId && p.id !== c.accompliceId
+      );
+
+      if (nonKillerTeamUnvoted.length === 0) {
+        c.phase = 'END_GAME';
+        if (c.jokerVotedOut && c.jokerTargetKillerGuess === c.killerId) {
+          c.jokerStoleVictory = true;
+          c.winnerTeam = 'JOKER';
+          c.log.push(`المهرج سرق الفوز! حدد المهرج القاتل الصحيح بعد التصويت ضده!`);
+        } else {
+          c.winnerTeam = 'KILLER_TEAM';
+          c.log.push(`انتهاء التحقيق! لم يتبقَ سوى القاتل وشريكه، فريق القاتل يفوز بالمباراة!`);
+        }
+      }
+    }
   }
   return c;
 }
@@ -238,6 +260,7 @@ export function startMatch(code: string, hostId: string): CaseState {
   c.selectedWeapon = null;
   c.selectedEvidence = null;
   c.confirmedClues = [];
+  c.folders = generateClueFolders();
   c.clueCycleStartTime = null;
   c.meDraftClues = {};
   c.meChangedClueCount = 0;
@@ -440,7 +463,8 @@ export function meConfirmClue(code: string, meId: string, folderIndex: number): 
   const draftTag = c.meDraftClues[folderIndex];
   if (!draftTag) throw new Error('لم يتم تحديد دليل في المجلد');
 
-  const folder = INVESTIGATION_FOLDERS.find((f) => f.id === folderIndex);
+  const folders = c.folders || INVESTIGATION_FOLDERS;
+  const folder = folders.find((f) => f.id === folderIndex);
   if (!folder) throw new Error('مجلد غير صالح');
 
   // Check if replacing an existing clue (ME can change 1 clue max per match)
@@ -547,6 +571,26 @@ export function submitVote(
   if (isFullyCorrect) {
     c.phase = 'KILLER_FINAL_GUESS';
     c.log.push(`المحققون حلوا الجريمة! يدخل القاتل المرحلة النهائية للتعرف على الشاهد.`);
+  } else {
+    // Check if only Killer and Accomplice remain alive (or no non-killer-team players have unspent badges left)
+    const activeUnvoted = c.players.filter(
+      (p) => p.role !== 'MEDICAL_EXAMINER' && !p.hasVoted
+    );
+    const nonKillerTeamUnvoted = activeUnvoted.filter(
+      (p) => p.role !== 'KILLER' && p.role !== 'ACCOMPLICE' && p.id !== c.killerId && p.id !== c.accompliceId
+    );
+
+    if (nonKillerTeamUnvoted.length === 0) {
+      c.phase = 'END_GAME';
+      if (c.jokerVotedOut && c.jokerTargetKillerGuess === c.killerId) {
+        c.jokerStoleVictory = true;
+        c.winnerTeam = 'JOKER';
+        c.log.push(`المهرج سرق الفوز! حدد المهرج القاتل الصحيح بعد التصويت ضده!`);
+      } else {
+        c.winnerTeam = 'KILLER_TEAM';
+        c.log.push(`انتهاء التحقيق! لم يتبقَ سوى القاتل وشريكه، فريق القاتل يفوز بالمباراة!`);
+      }
+    }
   }
 
   return c;
@@ -605,6 +649,7 @@ export function returnToLobby(code: string, hostId: string): CaseState {
   c.jokerVotedOut = false;
   c.jokerTargetKillerGuess = null;
   c.confirmedClues = [];
+  c.folders = generateClueFolders();
   c.slotStartTimes = {};
   c.meDraftClues = {};
   c.meChangedClueCount = 0;
@@ -691,6 +736,7 @@ export function getClientState(caseCode: string, playerId: string): any {
     myEvidence: mePlayer?.evidence || [],
     intel,
     confirmedClues: c.confirmedClues,
+    folders: c.folders || INVESTIGATION_FOLDERS,
     clueCycleStartTime: c.clueCycleStartTime,
     slotStartTimes: c.slotStartTimes,
     meDraftClues: myRole === 'MEDICAL_EXAMINER' ? c.meDraftClues : undefined,

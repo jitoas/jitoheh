@@ -1,3 +1,10 @@
+export interface ClueFolder {
+  id: number;
+  name: string;
+  category: string;
+  options: [string, string, string, string, string, string];
+}
+
 export type Role =
   | 'KILLER'
   | 'ACCOMPLICE'
@@ -108,6 +115,7 @@ export interface CaseState {
   jokerVotedOut: boolean;
   jokerTargetKillerGuess: string | null;
   confirmedClues: ConfirmedClue[];
+  folders?: ClueFolder[];
   clueCycleStartTime: number | null;
   slotStartTimes?: Record<number, number>;
   meDraftClues: Record<number, string>; // folderIndex -> clueTag
@@ -152,6 +160,7 @@ export interface ClientGameState {
     medicalExaminerPlayer?: { id: string; name: string; avatar: string };
   };
   confirmedClues: ConfirmedClue[];
+  folders?: ClueFolder[];
   clueCycleStartTime: number | null;
   slotStartTimes?: Record<number, number>;
   meDraftClues?: Record<number, string>; // only for ME
