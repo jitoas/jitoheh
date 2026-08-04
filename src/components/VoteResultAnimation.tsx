@@ -35,25 +35,15 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
       setCardsRevealed(true);
     }, 400);
 
-    // 2. Cinematic pause, then play realistic rubber stamp sound & slam stamp at 1800ms
+    // 2. Play realistic rubber stamp sound & slam stamp at 1800ms
     const slamTimer = setTimeout(() => {
       setStampPhase('slammed');
       setScreenShake(true);
       sfx.playStampSlam();
 
-      // Sound chime/buzz after stamp impact
-      const soundTimer = setTimeout(() => {
-        if (result.isFullyCorrect) {
-          sfx.playCorrectChime();
-        } else {
-          sfx.playWrongBuzz();
-        }
-      }, 350);
-
       const shakeTimer = setTimeout(() => setScreenShake(false), 500);
 
       return () => {
-        clearTimeout(soundTimer);
         clearTimeout(shakeTimer);
       };
     }, 1800);

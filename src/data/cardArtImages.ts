@@ -98,65 +98,227 @@ export function getCardImageUrl(card: { id: string; name: string; category: stri
   const tags = card.tags.map((t) => t.toLowerCase());
 
   if (card.category === 'weapon') {
-    if (nameLower.includes('سيانيد') || nameLower.includes('سم') || nameLower.includes('زرنيخ') || nameLower.includes('ريسين') || nameLower.includes('استركنين') || tags.includes('poison')) {
+    // 1. Poisons, Gases, Chemicals, & Potions
+    if (
+      nameLower.includes('سيانيد') ||
+      nameLower.includes('سم') ||
+      nameLower.includes('زرنيخ') ||
+      nameLower.includes('ريسين') ||
+      nameLower.includes('استركنين') ||
+      nameLower.includes('كلوروفورم') ||
+      nameLower.includes('حمض') ||
+      nameLower.includes('غاز') ||
+      nameLower.includes('ست الحسن') ||
+      nameLower.includes('مذيب') ||
+      nameLower.includes('كلور') ||
+      nameLower.includes('نبيذ') ||
+      nameLower.includes('أكسجين') ||
+      nameLower.includes('نيتروجين') ||
+      tags.includes('poison') ||
+      tags.includes('chemical')
+    ) {
       return WEAPON_IMAGES.poison;
     }
-    if (nameLower.includes('حقنة') || tags.includes('syringe')) {
-      return WEAPON_IMAGES.syringe;
-    }
-    if (nameLower.includes('مشرط') || nameLower.includes('سكين') || nameLower.includes('ساطور') || nameLower.includes('شفرة') || nameLower.includes('خنجر') || nameLower.includes('مقص') || tags.includes('sharp')) {
-      return WEAPON_IMAGES.knife;
-    }
-    if (nameLower.includes('مسدس') || nameLower.includes('رصاص') || nameLower.includes('قوس') || tags.includes('gunshot')) {
+
+    // 2. Firearms, Explosives, Pyrotechnics, & Ranged Projectiles
+    if (
+      nameLower.includes('مسدس') ||
+      nameLower.includes('رصاص') ||
+      nameLower.includes('مدفع') ||
+      nameLower.includes('مفجر') ||
+      nameLower.includes('مولوتوف') ||
+      nameLower.includes('إشارة') ||
+      nameLower.includes('ليزر') ||
+      nameLower.includes('صاعق') ||
+      tags.includes('gunshot') ||
+      tags.includes('electric')
+    ) {
       return WEAPON_IMAGES.revolver;
     }
-    if (nameLower.includes('فأس') || nameLower.includes('بلطة') || nameLower.includes('منشار')) {
-      return WEAPON_IMAGES.axe;
-    }
-    if (nameLower.includes('مطرقة') || nameLower.includes('عتلة') || nameLower.includes('أنبوب') || nameLower.includes('مضرب') || nameLower.includes('قبضة')) {
-      return WEAPON_IMAGES.crowbar;
-    }
-    if (nameLower.includes('سلك') || nameLower.includes('حبل') || nameLower.includes('خيط') || nameLower.includes('حزام') || tags.includes('strangulation')) {
+
+    // 3. Strangulation, Ropes, Cables, & Wires
+    if (
+      nameLower.includes('سلك') ||
+      nameLower.includes('أسلاك') ||
+      nameLower.includes('حبل') ||
+      nameLower.includes('خيط') ||
+      nameLower.includes('حزام') ||
+      nameLower.includes('نايلون') ||
+      nameLower.includes('جاروت') ||
+      nameLower.includes('طوق') ||
+      tags.includes('strangulation')
+    ) {
       return WEAPON_IMAGES.rope;
     }
-    if (nameLower.includes('زجاج') || nameLower.includes('إبريق') || tags.includes('glass')) {
-      return WEAPON_IMAGES.glass;
+
+    // 4. Edged Weapons, Blades, Knives, & Sharp Metal
+    if (
+      nameLower.includes('مشرط') ||
+      nameLower.includes('سكين') ||
+      nameLower.includes('ساطور') ||
+      nameLower.includes('شفرة') ||
+      nameLower.includes('خنجر') ||
+      nameLower.includes('ستاليتو') ||
+      nameLower.includes('سيف') ||
+      nameLower.includes('فأس') ||
+      nameLower.includes('بلطة') ||
+      nameLower.includes('منشار') ||
+      nameLower.includes('مقص') ||
+      nameLower.includes('سهم') ||
+      nameLower.includes('قوس') ||
+      nameLower.includes('حربة') ||
+      nameLower.includes('رمح') ||
+      nameLower.includes('توماهوك') ||
+      nameLower.includes('أزميل') ||
+      nameLower.includes('شورينا') ||
+      nameLower.includes('خطاف') ||
+      nameLower.includes('منجل') ||
+      nameLower.includes('موس') ||
+      nameLower.includes('مبرد') ||
+      nameLower.includes('شائك') ||
+      nameLower.includes('فخ') ||
+      nameLower.includes('مسامير') ||
+      nameLower.includes('كاشط') ||
+      nameLower.includes('ملقط') ||
+      nameLower.includes('قرن') ||
+      nameLower.includes('إبرة') ||
+      tags.includes('sharp')
+    ) {
+      return WEAPON_IMAGES.knife;
     }
-    if (nameLower.includes('حرق') || nameLower.includes('لهب') || nameLower.includes('شعلة') || tags.includes('fire')) {
-      return WEAPON_IMAGES.fire;
+
+    // 5. Blunt Instruments, Impact Tools, & Heavy Objects
+    if (
+      nameLower.includes('مطرقة') ||
+      nameLower.includes('عتلة') ||
+      nameLower.includes('أنبوب') ||
+      nameLower.includes('مضرب') ||
+      nameLower.includes('كباشة') ||
+      nameLower.includes('شمعدان') ||
+      nameLower.includes('مقلاة') ||
+      nameLower.includes('كأس') ||
+      nameLower.includes('قضيب') ||
+      nameLower.includes('سندان') ||
+      nameLower.includes('مجرفة') ||
+      nameLower.includes('مهدامة') ||
+      nameLower.includes('عكاز') ||
+      nameLower.includes('حجر') ||
+      nameLower.includes('سلسلة') ||
+      nameLower.includes('إبريق') ||
+      nameLower.includes('هاون') ||
+      nameLower.includes('طفاية') ||
+      nameLower.includes('أثقال') ||
+      nameLower.includes('كسارة') ||
+      nameLower.includes('قفل') ||
+      nameLower.includes('رخام') ||
+      nameLower.includes('مرجل') ||
+      nameLower.includes('تمثال') ||
+      nameLower.includes('مزولة') ||
+      tags.includes('blunt') ||
+      tags.includes('heavy')
+    ) {
+      return WEAPON_IMAGES.hammer;
     }
+
+    // Default Fallback
     return WEAPON_IMAGES.default;
   } else {
-    if (nameLower.includes('بصمة') || tags.includes('fingerprint')) {
+    // EVIDENCE CATEGORY
+
+    // 1. Forensics, Biological, & Crime Scene Traces
+    if (
+      nameLower.includes('بصمة') ||
+      nameLower.includes('دم') ||
+      nameLower.includes('أثر') ||
+      nameLower.includes('شعر') ||
+      nameLower.includes('طين') ||
+      nameLower.includes('تربة') ||
+      nameLower.includes('صلصال') ||
+      nameLower.includes('كعب') ||
+      nameLower.includes('طلاء') ||
+      nameLower.includes('ريشة') ||
+      tags.includes('fingerprint') ||
+      tags.includes('bleeding') ||
+      tags.includes('soil')
+    ) {
       return EVIDENCE_IMAGES.fingerprint;
     }
-    if (nameLower.includes('دم') || nameLower.includes('عينة') || tags.includes('bleeding')) {
-      return EVIDENCE_IMAGES.blood;
-    }
-    if (nameLower.includes('أثر') || nameLower.includes('كعب') || nameLower.includes('قدم') || nameLower.includes('طين') || tags.includes('soil')) {
-      return EVIDENCE_IMAGES.footprint;
-    }
-    if (nameLower.includes('ساعة') || tags.includes('time_of_death')) {
-      return EVIDENCE_IMAGES.watch;
-    }
-    if (nameLower.includes('خاتم') || nameLower.includes('زر') || nameLower.includes('عملة') || nameLower.includes('ولاعة') || tags.includes('gold')) {
-      return EVIDENCE_IMAGES.ring;
-    }
-    if (nameLower.includes('محفظة') || nameLower.includes('إيصال') || tags.includes('money')) {
-      return EVIDENCE_IMAGES.wallet;
-    }
-    if (nameLower.includes('مفتاح') || tags.includes('key')) {
-      return EVIDENCE_IMAGES.key;
-    }
-    if (nameLower.includes('قفاز') || nameLower.includes('شريط') || nameLower.includes('قماش') || tags.includes('fiber')) {
-      return EVIDENCE_IMAGES.glove;
-    }
-    if (nameLower.includes('رسالة') || nameLower.includes('صورة') || nameLower.includes('دفتر') || nameLower.includes('جريدة') || tags.includes('paper')) {
-      return EVIDENCE_IMAGES.paper;
-    }
-    if (nameLower.includes('دواء') || nameLower.includes('عبوة') || nameLower.includes('قطارة') || tags.includes('medicine')) {
+
+    // 2. Medical Evidence, Vials, & Droppers
+    if (
+      nameLower.includes('دواء') ||
+      nameLower.includes('قطارة') ||
+      nameLower.includes('أمبولة') ||
+      nameLower.includes('سدادة') ||
+      nameLower.includes('حبوب') ||
+      tags.includes('medicine')
+    ) {
       return EVIDENCE_IMAGES.medicine;
     }
+
+    // 3. Documents, Letters, Receipts, & Paper Items
+    if (
+      nameLower.includes('رسالة') ||
+      nameLower.includes('صورة') ||
+      nameLower.includes('دفتر') ||
+      nameLower.includes('جريدة') ||
+      nameLower.includes('إيصال') ||
+      nameLower.includes('تذكرة') ||
+      nameLower.includes('طابع') ||
+      nameLower.includes('ختم') ||
+      nameLower.includes('نشاف') ||
+      nameLower.includes('غلاف') ||
+      nameLower.includes('فاصل') ||
+      nameLower.includes('كبريت') ||
+      tags.includes('paper') ||
+      tags.includes('text')
+    ) {
+      return EVIDENCE_IMAGES.paper;
+    }
+
+    // 4. Fabrics, Gloves, Accessories, & Wearing Apparel
+    if (
+      nameLower.includes('قفاز') ||
+      nameLower.includes('شريط') ||
+      nameLower.includes('صوف') ||
+      nameLower.includes('كيس') ||
+      nameLower.includes('بكرة') ||
+      nameLower.includes('شمع') ||
+      nameLower.includes('منديل') ||
+      tags.includes('fiber') ||
+      tags.includes('clothing')
+    ) {
+      return EVIDENCE_IMAGES.glove;
+    }
+
+    // 5. Personal Effects, Jewelry, Valuables, & Pocket Items
+    if (
+      nameLower.includes('ساعة') ||
+      nameLower.includes('خاتم') ||
+      nameLower.includes('مفتاح') ||
+      nameLower.includes('عملة') ||
+      nameLower.includes('نقود') ||
+      nameLower.includes('محفظة') ||
+      nameLower.includes('فنجان') ||
+      nameLower.includes('ولاعة') ||
+      nameLower.includes('شفاه') ||
+      nameLower.includes('ملعقة') ||
+      nameLower.includes('زر أكمام') ||
+      nameLower.includes('حلقة') ||
+      nameLower.includes('زر') ||
+      nameLower.includes('عطر') ||
+      nameLower.includes('مرآة') ||
+      nameLower.includes('عدسة') ||
+      nameLower.includes('كشتبان') ||
+      nameLower.includes('سيجار') ||
+      nameLower.includes('ريموت') ||
+      tags.includes('personal_item') ||
+      tags.includes('gold') ||
+      tags.includes('time_of_death')
+    ) {
+      return EVIDENCE_IMAGES.watch;
+    }
+
     return EVIDENCE_IMAGES.default;
   }
 }
