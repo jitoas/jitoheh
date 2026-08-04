@@ -240,7 +240,6 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   <button
                     key={option}
                     onClick={() => {
-                      sfx.playDarkWhisper();
                       onSelectDraftClue(activeFolder.id, option);
                     }}
                     className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
@@ -279,7 +278,6 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                   <button
                     key={option}
                     onClick={() => {
-                      sfx.playDarkWhisper();
                       onSelectDraftClue(activeFolder.id, option);
                     }}
                     className={`w-full text-right p-3.5 rounded-xl border transition-all flex items-center justify-between ${
@@ -316,7 +314,7 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
               disabled={!draftClues[activeFolder.id]}
               onClick={() => {
                 if (draftClues[activeFolder.id]) {
-                  sfx.playDarkWhisper();
+                  sfx.playMedicalExaminerSound();
                   onConfirmClue(activeFolder.id);
                   setActiveFolderId(null);
                 }

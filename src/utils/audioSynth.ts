@@ -148,15 +148,15 @@ class SoundEffects {
   }
 
   // Mysterious dark whisper / shadow sound effect for Medical Examiner clue reveal / change
-  playDarkWhisper() {
+  playMedicalExaminerSound() {
     try {
       this.init();
       if (!this.ctx) return;
 
       const now = this.ctx.currentTime;
+      const duration = 1.2; // Full complete sound duration from beginning to end
 
-      // 1. Shadow Noise Whisper Breath (Bandpass sweep for secretive whisper sound)
-      const duration = 0.75;
+      // 1. Full Noir Atmospheric Whisper / Breath Noise Sweep
       const bufferSize = Math.floor(this.ctx.sampleRate * duration);
       const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -167,12 +167,11 @@ class SoundEffects {
       const noiseSource = this.ctx.createBufferSource();
       noiseSource.buffer = buffer;
 
-      // Dynamic Bandpass filter to create realistic dark whisper/breath resonance
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'bandpass';
-      filter.Q.setValueAtTime(4.0, now);
-      filter.frequency.setValueAtTime(1500, now);
-      filter.frequency.exponentialRampToValueAtTime(320, now + duration * 0.85);
+      filter.Q.setValueAtTime(3.5, now);
+      filter.frequency.setValueAtTime(1400, now);
+      filter.frequency.exponentialRampToValueAtTime(280, now + duration * 0.9);
 
       const noiseGain = this.ctx.createGain();
       noiseGain.gain.setValueAtTime(0.001, now);
@@ -184,15 +183,15 @@ class SoundEffects {
       noiseGain.connect(this.ctx.destination);
       noiseSource.start(now);
 
-      // 2. Secretive Noir Sub Drop (Deep low frequency rumble)
+      // 2. Deep Noir Sub Bass Resonance Drop
       const subOsc = this.ctx.createOscillator();
       const subGain = this.ctx.createGain();
       subOsc.type = 'sine';
-      subOsc.frequency.setValueAtTime(120, now);
-      subOsc.frequency.exponentialRampToValueAtTime(42, now + duration * 0.8);
+      subOsc.frequency.setValueAtTime(130, now);
+      subOsc.frequency.exponentialRampToValueAtTime(40, now + duration * 0.85);
 
       subGain.gain.setValueAtTime(0.001, now);
-      subGain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+      subGain.gain.linearRampToValueAtTime(0.35, now + 0.1);
       subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       subOsc.connect(subGain);
@@ -200,15 +199,15 @@ class SoundEffects {
       subOsc.start(now);
       subOsc.stop(now + duration);
 
-      // 3. Eerie Dark Minor Interval Tone (Classified atmosphere)
+      // 3. Eerie Mystery Minor Interval Accent
       const toneOsc = this.ctx.createOscillator();
       const toneGain = this.ctx.createGain();
       toneOsc.type = 'triangle';
       toneOsc.frequency.setValueAtTime(220, now + 0.05); // A3
-      toneOsc.frequency.exponentialRampToValueAtTime(207.65, now + 0.3); // G#3 (Mystery minor accent)
+      toneOsc.frequency.exponentialRampToValueAtTime(207.65, now + duration * 0.6); // G#3
 
       toneGain.gain.setValueAtTime(0.001, now);
-      toneGain.gain.linearRampToValueAtTime(0.12, now + 0.15);
+      toneGain.gain.linearRampToValueAtTime(0.15, now + 0.15);
       toneGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
       toneOsc.connect(toneGain);
@@ -218,6 +217,10 @@ class SoundEffects {
     } catch (e) {
       console.warn('Audio play error:', e);
     }
+  }
+
+  playDarkWhisper() {
+    this.playMedicalExaminerSound();
   }
 }
 
