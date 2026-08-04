@@ -63,21 +63,36 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
     });
   }, [state.players, state.intel, state.caseCode, isWitness]);
 
-  // If player is Medical Examiner: Show large self profile card on LEFT side
+  // If player is Medical Examiner: Show Medical Examiner badge + full culprit dossier panel
   if (isME && mePlayer) {
     const avatarPreset = DETECTIVE_AVATARS.find((a) => a.id === mePlayer.avatar);
 
+    const killerPlayer = state.players.find((p) => p.id === state.intel?.killerId);
+    const accomplicePlayer = state.intel?.accompliceId
+      ? state.players.find((p) => p.id === state.intel.accompliceId)
+      : null;
+
+    const killerAvatar = killerPlayer
+      ? DETECTIVE_AVATARS.find((a) => a.id === killerPlayer.avatar)
+      : null;
+    const accompliceAvatar = accomplicePlayer
+      ? DETECTIVE_AVATARS.find((a) => a.id === accomplicePlayer.avatar)
+      : null;
+
+    const selectedWeapon = state.intel?.selectedWeapon;
+    const selectedEvidence = state.intel?.selectedEvidence;
+
     return (
-      <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 p-5 shadow-2xl flex flex-col space-y-4 dir-rtl text-right">
+      <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 p-4 shadow-2xl flex flex-col space-y-4 dir-rtl text-right">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400">
-              <Stethoscope className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400">
+              <Stethoscope className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-xs font-extrabold text-zinc-100 font-serif tracking-wide uppercase">
-                بطاقة الطبيب الشرعي
+                لوحة الطبيب الشرعي
               </h3>
               <span className="text-[9px] text-zinc-500 font-mono">MEDICAL EXAMINER HUD</span>
             </div>
@@ -87,32 +102,158 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
           </span>
         </div>
 
-        {/* Large Profile Card */}
-        <div className="p-5 rounded-2xl border border-amber-500/50 bg-amber-500/10 flex flex-col items-center text-center space-y-3 relative overflow-hidden shadow-xl">
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider font-mono">
-            أنت
-          </div>
-
-          {/* Large Avatar */}
+        {/* Self ME Profile Card */}
+        <div className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 flex items-center gap-3 shadow-md">
           <div
-            className={`w-20 h-20 rounded-full flex items-center justify-center font-extrabold text-3xl text-white shadow-2xl shrink-0 ${
-              avatarPreset ? avatarPreset.bg : 'bg-zinc-800'
+            className={`w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-base text-white shadow-lg shrink-0 ${
+              avatarPreset ? avatarPreset.bg : 'bg-amber-800'
             }`}
-            style={{ border: `3px solid ${avatarPreset ? avatarPreset.color : '#f59e0b'}` }}
+            style={{ border: `2px solid ${avatarPreset ? avatarPreset.color : '#f59e0b'}` }}
           >
             {mePlayer.name.charAt(0)}
           </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-extrabold text-zinc-100 font-serif truncate">
+                {mePlayer.name}
+              </h4>
+              <span className="text-[9px] font-extrabold text-amber-400 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full font-serif shrink-0">
+                الطبيب الشرعي (أنت)
+              </span>
+            </div>
+            <p className="text-[10px] text-zinc-400 truncate mt-0.5">
+              تقود التحقيق وتوجه المحققين بالأدلة الصحيحة
+            </p>
+          </div>
+        </div>
 
-          <div>
-            <h4 className="text-lg font-extrabold text-zinc-100 font-serif">{mePlayer.name}</h4>
-            <span className="inline-block mt-1 text-xs font-bold text-amber-400 bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 rounded-full font-serif">
-              الطبيب الشرعي (Medical Examiner)
+        {/* 1. Killer Portrait & Name */}
+        <div className="p-3 rounded-2xl border border-red-900/60 bg-red-950/20 flex items-center gap-3 shadow-md">
+          <div
+            className={`w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-base text-white shadow-lg shrink-0 ${
+              killerAvatar ? killerAvatar.bg : 'bg-red-900'
+            }`}
+            style={{ border: `2px solid ${killerAvatar ? killerAvatar.color : '#ef4444'}` }}
+          >
+            {killerPlayer ? killerPlayer.name.charAt(0) : 'K'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-bold text-zinc-100 font-serif truncate">
+                {killerPlayer ? killerPlayer.name : 'جاري الاختيار...'}
+              </h4>
+              <span className="text-[9px] font-extrabold text-red-400 bg-red-500/20 border border-red-500/40 px-2 py-0.5 rounded-full font-serif shrink-0">
+                القاتل (Killer)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Accomplice Portrait & Name */}
+        <div className="p-3 rounded-2xl border border-amber-900/60 bg-amber-950/20 flex items-center gap-3 shadow-md">
+          {accomplicePlayer ? (
+            <>
+              <div
+                className={`w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-base text-white shadow-lg shrink-0 ${
+                  accompliceAvatar ? accompliceAvatar.bg : 'bg-amber-900'
+                }`}
+                style={{ border: `2px solid ${accompliceAvatar ? accompliceAvatar.color : '#f59e0b'}` }}
+              >
+                {accomplicePlayer.name.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-zinc-100 font-serif truncate">
+                    {accomplicePlayer.name}
+                  </h4>
+                  <span className="text-[9px] font-extrabold text-amber-400 bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 rounded-full font-serif shrink-0">
+                    الشريك (Accomplice)
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between w-full text-zinc-400 text-xs font-serif px-1">
+              <span className="font-bold">الشريك (Accomplice):</span>
+              <span className="text-[10px] font-mono bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full text-zinc-500">
+                لا يوجد شريك في هذه القضية
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 3. Separator Line */}
+        <div className="relative my-1 flex items-center justify-center">
+          <div className="border-t border-zinc-800 w-full" />
+          <span className="absolute bg-zinc-950 px-3 text-[9px] font-mono text-amber-400 uppercase tracking-widest border border-amber-500/30 rounded-full">
+            أدلة الجريمة المحددة
+          </span>
+        </div>
+
+        {/* 4. Selected Weapon (AI Image + Short Name) */}
+        <div className="p-3 rounded-2xl border border-red-900/60 bg-zinc-900/80 space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-extrabold text-red-400 uppercase tracking-wider font-mono">
+              سلاح الجريمة المحدد
             </span>
+            <span className="text-[9px] text-zinc-500 font-mono">SELECTED WEAPON</span>
           </div>
 
-          <p className="text-xs text-zinc-400 leading-relaxed font-sans max-w-xs pt-2 border-t border-amber-500/20">
-            أنت تقود التحقيق وتعرف القاتل والجريمة الحقيقية. مهمتك اختيار الأدلة التوجيهية المناسبة لمساعدة المحققين.
-          </p>
+          {selectedWeapon ? (
+            <div className="space-y-1.5">
+              <div className="relative h-36 rounded-xl overflow-hidden border border-red-900/40 shadow-inner group">
+                <img
+                  src={getCardImageUrl(selectedWeapon)}
+                  alt={selectedWeapon.name}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-2 right-2 left-2 text-center">
+                  <span className="text-sm font-extrabold text-zinc-100 font-serif drop-shadow-md">
+                    {selectedWeapon.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-24 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/60 flex items-center justify-center text-center p-3">
+              <span className="text-xs text-zinc-500 font-serif">في انتظار اختيار القاتل للسلاح...</span>
+            </div>
+          )}
+        </div>
+
+        {/* 5. Selected Evidence (AI Image + Short Name) */}
+        <div className="p-3 rounded-2xl border border-amber-900/60 bg-zinc-900/80 space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider font-mono">
+              دليل مسرح الجريمة المحدد
+            </span>
+            <span className="text-[9px] text-zinc-500 font-mono">SELECTED EVIDENCE</span>
+          </div>
+
+          {selectedEvidence ? (
+            <div className="space-y-1.5">
+              <div className="relative h-36 rounded-xl overflow-hidden border border-amber-900/40 shadow-inner group">
+                <img
+                  src={getCardImageUrl(selectedEvidence)}
+                  alt={selectedEvidence.name}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-2 right-2 left-2 text-center">
+                  <span className="text-sm font-extrabold text-zinc-100 font-serif drop-shadow-md">
+                    {selectedEvidence.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-24 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/60 flex items-center justify-center text-center p-3">
+              <span className="text-xs text-zinc-500 font-serif">في انتظار اختيار القاتل للدليل...</span>
+            </div>
+          )}
         </div>
       </div>
     );

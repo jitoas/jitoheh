@@ -704,12 +704,7 @@ export function getClientState(caseCode: string, playerId: string): any {
     intel.medicalExaminerPlayer = { id: meP.id, name: meP.name, avatar: meP.avatar };
   }
 
-  if (myRole === 'KILLER') {
-    intel.killerId = c.killerId;
-    intel.accompliceId = c.accompliceId;
-    intel.selectedWeapon = c.selectedWeapon;
-    intel.selectedEvidence = c.selectedEvidence;
-  } else if (myRole === 'ACCOMPLICE') {
+  if (myRole === 'KILLER' || myRole === 'ACCOMPLICE' || myRole === 'MEDICAL_EXAMINER') {
     intel.killerId = c.killerId;
     intel.accompliceId = c.accompliceId;
     intel.selectedWeapon = c.selectedWeapon;
