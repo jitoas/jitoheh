@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ClientGameState } from '../types';
 import { CardArt } from './CardArt';
 import { Vote, Check, X } from 'lucide-react';
+import { sfx } from '../utils/audioSynth';
 
 interface VotingModalProps {
   state: ClientGameState;
@@ -169,6 +170,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
             disabled={!canSubmit}
             onClick={() => {
               if (canSubmit) {
+                sfx.playStampSound();
                 onSubmitVote(targetId, selectedWeaponId, selectedEvidenceId);
                 onClose();
               }

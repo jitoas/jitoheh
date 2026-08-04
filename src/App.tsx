@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ClientGameState, PlayerProfile, Card } from './types';
 import { getSavedProfile, saveProfile } from './utils/storage';
+import { sfx } from './utils/audioSynth';
 import { DETECTIVE_AVATARS } from './components/CardArt';
 import { ProfileModal } from './components/ProfileModal';
 import { LobbyScreen } from './components/LobbyScreen';
@@ -46,6 +47,26 @@ export default function App() {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [isMyCardsOpen, setIsMyCardsOpen] = useState(false);
   const [dismissedVoteId, setDismissedVoteId] = useState<string | null>(null);
+
+  // Play Bell sound ONLY when Medical Examiner reveals or changes a clue for everyone
+  const prevConfirmedCluesRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!gameState?.confirmedClues) return;
+
+    const currentSig = JSON.stringify(
+      gameState.confirmedClues.map((c) => ({
+        i: c.folderIndex,
+        tag: c.clueTag,
+      }))
+    );
+
+    if (prevConfirmedCluesRef.current !== null && prevConfirmedCluesRef.current !== currentSig) {
+      sfx.playBellSound();
+    }
+
+    prevConfirmedCluesRef.current = currentSig;
+  }, [gameState?.confirmedClues]);
 
   useEffect(() => {
     socket = io({

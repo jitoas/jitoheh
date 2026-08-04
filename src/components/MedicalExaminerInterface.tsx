@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ClientGameState, Card } from '../types';
 import { INVESTIGATION_FOLDERS, getClueMatchesCount, getSlotTimerDuration } from '../data/clues';
 import { Folder, FolderOpen, CheckCircle, Unlock, Clock, Send, AlertCircle, X, ChevronUp, ChevronDown, Lock } from 'lucide-react';
-import { sfx } from '../utils/audioSynth';
 
 interface MedicalExaminerInterfaceProps {
   state: ClientGameState;
@@ -314,7 +313,6 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
               disabled={!draftClues[activeFolder.id]}
               onClick={() => {
                 if (draftClues[activeFolder.id]) {
-                  sfx.playMedicalExaminerSound();
                   onConfirmClue(activeFolder.id);
                   setActiveFolderId(null);
                 }

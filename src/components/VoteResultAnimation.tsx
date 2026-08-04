@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { VoteResult, Card } from '../types';
 import { CheckCircle, XCircle, ShieldAlert } from 'lucide-react';
-import { sfx } from '../utils/audioSynth';
 import { WEAPONS_DATABASE } from '../data/weapons';
 import { EVIDENCE_DATABASE } from '../data/evidence';
 import { getCardImageUrl } from '../data/cardArtImages';
@@ -35,11 +34,10 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
       setCardsRevealed(true);
     }, 400);
 
-    // 2. Play realistic rubber stamp sound & slam stamp at 1800ms
+    // 2. Slam stamp at 1800ms
     const slamTimer = setTimeout(() => {
       setStampPhase('slammed');
       setScreenShake(true);
-      sfx.playStampSlam();
 
       const shakeTimer = setTimeout(() => setScreenShake(false), 500);
 
