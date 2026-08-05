@@ -89,8 +89,8 @@ export function generateClueFolders(): ClueFolder[] {
   const shuffledCauses = shuffle([...CAUSE_OF_DEATH_OPTIONS]).slice(0, 6) as [string, string, string, string, string, string];
   const causeOfDeathFolder: ClueFolder = {
     id: 1,
-    name: 'Cause of Death',
-    category: 'Cause of Death',
+    name: 'سبب الوفاة',
+    category: 'سبب الوفاة',
     options: shuffledCauses,
   };
 

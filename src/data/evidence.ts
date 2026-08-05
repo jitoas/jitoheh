@@ -1,8 +1,8 @@
 import { Card } from '../types';
 
 export const EVIDENCE_DATABASE: Card[] = [
-  { id: 'e1', name: 'بقعة دم', category: 'evidence', tags: ['fiber', 'bleeding', 'personal_item', 'house', 'red'], description: '', artStyleId: 201 },
-  { id: 'e2', name: 'بصمة أصابع', category: 'evidence', tags: ['fingerprint', 'paper', 'hospital', 'school', 'crime_scene'], description: '', artStyleId: 202 },
+  { id: 'e1', name: 'عينة دم', category: 'evidence', tags: ['fiber', 'bleeding', 'personal_item', 'house', 'red'], description: '', artStyleId: 201 },
+  { id: 'e2', name: 'بصمة إصبع', category: 'evidence', tags: ['fingerprint', 'paper', 'hospital', 'school', 'crime_scene'], description: '', artStyleId: 202 },
   { id: 'e3', name: 'ساعة جيب', category: 'evidence', tags: ['metal', 'glass', 'gold', 'personal_item', 'time_of_death'], description: '', artStyleId: 203 },
   { id: 'e4', name: 'شريط قماش', category: 'evidence', tags: ['fiber', 'red', 'personal_item', 'house', 'school'], description: '', artStyleId: 204 },
   { id: 'e5', name: 'خاتم ذهبي', category: 'evidence', tags: ['gold', 'metal', 'personal_item', 'house'], description: '', artStyleId: 205 },
@@ -37,14 +37,14 @@ export const EVIDENCE_DATABASE: Card[] = [
   { id: 'e34', name: 'محفظة جلدية', category: 'evidence', tags: ['leather', 'personal_item', 'paper', 'house', 'money'], description: '', artStyleId: 234 },
   { id: 'e35', name: 'ريشة طائر', category: 'evidence', tags: ['organic', 'animal', 'outdoor', 'black', 'fiber'], description: '', artStyleId: 235 },
   { id: 'e36', name: 'طابع بريدي', category: 'evidence', tags: ['paper', 'text', 'school', 'house', 'personal_item'], description: '', artStyleId: 236 },
-  { id: 'e37', name: 'عقب سيجار', category: 'evidence', tags: ['fire', 'burn', 'heat', 'organic', 'personal_item'], description: '', artStyleId: 237 },
+  { id: 'e37', name: 'عقب سيجارة', category: 'evidence', tags: ['fire', 'burn', 'heat', 'organic', 'personal_item'], description: '', artStyleId: 237 },
   { id: 'e38', name: 'منديل ورقي', category: 'evidence', tags: ['paper', 'liquid', 'organic', 'house', 'text'], description: '', artStyleId: 238 },
   { id: 'e39', name: 'زر أكمام', category: 'evidence', tags: ['metal', 'gold', 'personal_item', 'house', 'clothing'], description: '', artStyleId: 239 },
   { id: 'e40', name: 'كيس قماش', category: 'evidence', tags: ['fiber', 'personal_item', 'gold', 'house', 'red'], description: '', artStyleId: 240 },
   { id: 'e41', name: 'مشبك ورق', category: 'evidence', tags: ['metal', 'office', 'school', 'paper', 'small'], description: '', artStyleId: 241 },
   { id: 'e42', name: 'غلاف رسالة', category: 'evidence', tags: ['paper', 'fire', 'burn', 'text', 'house'], description: '', artStyleId: 242 },
   { id: 'e43', name: 'ورق نشاف', category: 'evidence', tags: ['paper', 'liquid', 'text', 'school', 'office'], description: '', artStyleId: 243 },
-  { id: 'e44', name: 'شظية مرآة', category: 'evidence', tags: ['glass', 'fragile', 'personal_item', 'house', 'silver'], description: '', artStyleId: 244 },
+  { id: 'e44', name: 'زجاج مكسور', category: 'evidence', tags: ['glass', 'fragile', 'personal_item', 'house', 'silver'], description: '', artStyleId: 244 },
   { id: 'e45', name: 'تذكرة قطار', category: 'evidence', tags: ['paper', 'text', 'school', 'time_of_death', 'personal_item'], description: '', artStyleId: 245 },
   { id: 'e46', name: 'قصاصة جريدة', category: 'evidence', tags: ['paper', 'text', 'school', 'house', 'darkness'], description: '', artStyleId: 246 },
   { id: 'e47', name: 'كعب حذاء', category: 'evidence', tags: ['leather', 'outdoor', 'personal_item', 'house', 'soil'], description: '', artStyleId: 247 },
