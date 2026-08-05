@@ -29,7 +29,7 @@ interface CardData {
 }
 
 export function getCardImageUrl(card: CardData): string {
-  const isWeapon = card.category === 'weapon';
+  const isWeapon = card.category === 'weapon' || (card.id && card.id.startsWith('w'));
   const tags = card.tags || [];
   const name = card.name || '';
 
