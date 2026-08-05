@@ -44,9 +44,9 @@ export const CardArt: React.FC<CardArtProps> = ({ card, className = '', size = '
           onError={(e) => {
             const target = e.currentTarget;
             if (card.category === 'weapon' || card.id?.startsWith('w')) {
-              target.src = '/assets/crime_weapon_art_1785742988879.jpg';
+              target.src = '/cards/w1.png';
             } else {
-              target.src = '/assets/crime_evidence_art_1785743002100.jpg';
+              target.src = '/cards/e1.png';
             }
           }}
           className="w-full h-full object-cover filter contrast-110 brightness-95 group-hover:scale-105 transition-all duration-500"
