@@ -29,6 +29,12 @@ interface CardData {
 }
 
 export function getCardImageUrl(card: CardData): string {
+  if (card.id) {
+    if (card.id.startsWith('w') || card.id.startsWith('e')) {
+      return `/cards/${card.id}.png`;
+    }
+  }
+
   const isWeapon = card.category === 'weapon' || (card.id && card.id.startsWith('w'));
   const tags = card.tags || [];
   const name = card.name || '';

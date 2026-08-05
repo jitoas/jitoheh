@@ -41,6 +41,14 @@ export const CardArt: React.FC<CardArtProps> = ({ card, className = '', size = '
           src={imageUrl}
           alt={card.name}
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (card.category === 'weapon' || card.id?.startsWith('w')) {
+              target.src = '/assets/crime_weapon_art_1785742988879.jpg';
+            } else {
+              target.src = '/assets/crime_evidence_art_1785743002100.jpg';
+            }
+          }}
           className="w-full h-full object-cover filter contrast-110 brightness-95 group-hover:scale-105 transition-all duration-500"
         />
         {/* Subtle Bottom Vignette */}

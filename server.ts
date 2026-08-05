@@ -1,11 +1,21 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import { exec } from 'child_process';
 import { Server as SocketIOServer } from 'socket.io';
 import { createServer as createViteServer } from 'vite';
 import { setupSocketHandlers } from './src/server/socketHandlers';
 
+function runCardSlicer() {
+  exec('node scripts/slice_cards.js', (err, stdout, stderr) => {
+    if (stdout) console.log('[Slicer]', stdout);
+    if (stderr) console.error('[Slicer Error]', stderr);
+  });
+}
+
 async function startServer() {
+  runCardSlicer();
+
   const app = express();
   const server = http.createServer(app);
   const io = new SocketIOServer(server, {
@@ -22,6 +32,11 @@ async function startServer() {
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
+  });
+
+  app.post('/api/slice-cards', (req, res) => {
+    runCardSlicer();
+    res.json({ status: 'slicing_triggered' });
   });
 
   setupSocketHandlers(io);
