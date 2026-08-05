@@ -2,6 +2,7 @@
 
 class SoundEffects {
   private ctx: AudioContext | null = null;
+  private isPlayingStamp = false;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -29,7 +30,8 @@ class SoundEffects {
     }
   }
 
-  // Stamp Sound: Real mechanical rubber stamp slam on paper
+  // Single Heavy Paper / Case File Impact Sound
+  // Plays ONCE with a heavy, clean, cinematic thud matching Noir investigation style.
   playStampSound() {
     try {
       this.init();
@@ -38,60 +40,76 @@ class SoundEffects {
         this.ctx.resume().catch(() => {});
       }
 
+      // Concurrency / repeat guard: never overlap or restart while playing
+      if (this.isPlayingStamp) {
+        return;
+      }
+
+      this.isPlayingStamp = true;
+      setTimeout(() => {
+        this.isPlayingStamp = false;
+      }, 600);
+
       const now = this.ctx.currentTime;
 
-      // 4 Presses sequence timing: t = 0s, 0.08s, 0.16s, 0.28s (final heavy slam)
-      const presses = [
-        { time: now + 0.0, volume: 0.4, pitch: 350 },
-        { time: now + 0.08, volume: 0.5, pitch: 380 },
-        { time: now + 0.16, volume: 0.6, pitch: 400 },
-        { time: now + 0.28, volume: 1.0, pitch: 120 }, // Final heavy impact slam
-      ];
+      // 1. Initial Crisp Paper/Rubber Contact Noise (Lowpassed noise transient)
+      const noiseLen = 0.06;
+      const bufferSize = Math.floor(this.ctx.sampleRate * noiseLen);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.18));
+      }
 
-      presses.forEach((p, idx) => {
-        if (!this.ctx) return;
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = buffer;
 
-        // Mechanical click / paper hit noise
-        const noiseLen = idx === 3 ? 0.12 : 0.03;
-        const bufferSize = Math.floor(this.ctx.sampleRate * noiseLen);
-        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
-        }
+      const noiseFilter = this.ctx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.setValueAtTime(900, now);
+      noiseFilter.frequency.exponentialRampToValueAtTime(150, now + noiseLen);
 
-        const noiseSource = this.ctx.createBufferSource();
-        noiseSource.buffer = buffer;
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.8, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + noiseLen);
 
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = idx === 3 ? 'lowpass' : 'bandpass';
-        filter.frequency.setValueAtTime(idx === 3 ? 600 : 2200, p.time);
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noiseSource.start(now);
 
-        const noiseGain = this.ctx.createGain();
-        noiseGain.gain.setValueAtTime(p.volume, p.time);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, p.time + noiseLen);
+      // 2. Heavy Sub Bass Impact Body (Deep pitch sweep)
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(150, now);
+      subOsc.frequency.exponentialRampToValueAtTime(32, now + 0.22);
 
-        noiseSource.connect(filter);
-        filter.connect(noiseGain);
-        noiseGain.connect(this.ctx.destination);
-        noiseSource.start(p.time);
+      subGain.gain.setValueAtTime(1.0, now);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
-        // Heavy body thud for stamp impact
-        const osc = this.ctx.createOscillator();
-        const oscGain = this.ctx.createGain();
-        osc.type = idx === 3 ? 'sine' : 'triangle';
-        osc.frequency.setValueAtTime(p.pitch, p.time);
-        osc.frequency.exponentialRampToValueAtTime(idx === 3 ? 35 : 100, p.time + (idx === 3 ? 0.2 : 0.04));
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+      subOsc.start(now);
+      subOsc.stop(now + 0.25);
 
-        oscGain.gain.setValueAtTime(p.volume * (idx === 3 ? 1.0 : 0.4), p.time);
-        oscGain.gain.exponentialRampToValueAtTime(0.001, p.time + (idx === 3 ? 0.22 : 0.05));
+      // 3. Resonant Desk / Case File Punch
+      const bodyOsc = this.ctx.createOscillator();
+      const bodyGain = this.ctx.createGain();
+      bodyOsc.type = 'triangle';
+      bodyOsc.frequency.setValueAtTime(100, now);
+      bodyOsc.frequency.exponentialRampToValueAtTime(25, now + 0.14);
 
-        osc.connect(oscGain);
-        oscGain.connect(this.ctx.destination);
-        osc.start(p.time);
-        osc.stop(p.time + (idx === 3 ? 0.22 : 0.05));
-      });
+      bodyGain.gain.setValueAtTime(0.7, now);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+      bodyOsc.connect(bodyGain);
+      bodyGain.connect(this.ctx.destination);
+      bodyOsc.start(now);
+      bodyOsc.stop(now + 0.16);
+
     } catch (e) {
+      this.isPlayingStamp = false;
       console.warn('Audio play error:', e);
     }
   }
