@@ -126,6 +126,7 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
                   alt={evidenceCard.name}
                   className="w-full h-full object-cover filter contrast-110 brightness-95"
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/e1.png'; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
               </div>
@@ -145,6 +146,7 @@ export const VoteResultAnimation: React.FC<VoteResultAnimationProps> = ({ result
                   alt={weaponCard.name}
                   className="w-full h-full object-cover filter contrast-110 brightness-95"
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/w1.png'; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
               </div>

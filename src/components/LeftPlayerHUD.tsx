@@ -206,6 +206,7 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                   src={getCardImageUrl(selectedWeapon)}
                   alt={selectedWeapon.name}
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/w1.png'; }}
                   className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
@@ -239,6 +240,7 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                   src={getCardImageUrl(selectedEvidence)}
                   alt={selectedEvidence.name}
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/e1.png'; }}
                   className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
@@ -375,6 +377,7 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                   src={getCardImageUrl(selectedWeapon)}
                   alt={selectedWeapon.name}
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/w1.png'; }}
                   className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
@@ -408,6 +411,7 @@ export const LeftPlayerHUD: React.FC<LeftPlayerHUDProps> = ({
                   src={getCardImageUrl(selectedEvidence)}
                   alt={selectedEvidence.name}
                   referrerPolicy="no-referrer"
+                  onError={(e) => { e.currentTarget.src = '/cards/e1.png'; }}
                   className="w-full h-full object-cover filter contrast-125 brightness-90 group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
