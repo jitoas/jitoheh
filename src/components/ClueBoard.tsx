@@ -114,10 +114,32 @@ export const ClueBoard: React.FC<ClueBoardProps> = ({
 
                 {/* Clue Content */}
                 {confirmedClue ? (
-                  <div className="mt-2 inline-block bg-yellow-400/20 border border-yellow-400/50 px-3 py-1.5 rounded-xl">
-                    <span className="text-base font-extrabold text-yellow-300 tracking-wide font-serif uppercase">
-                      {confirmedClue.clueTag}
-                    </span>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="text-[11px] font-bold text-amber-400/90 font-mono mb-1">
+                      خيارات الفئة ({folder.name}):
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {folder.options.map((option) => {
+                        const isChosen = option === confirmedClue.clueTag;
+                        return (
+                          <div
+                            key={option}
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between border transition-all ${
+                              isChosen
+                                ? 'bg-yellow-400 text-zinc-950 border-yellow-300 font-extrabold shadow-md shadow-yellow-500/20 ring-1 ring-yellow-300'
+                                : 'bg-zinc-900/80 text-zinc-300 border-zinc-800/80 hover:bg-zinc-800/60'
+                            }`}
+                          >
+                            <span className="truncate">{option}</span>
+                            {isChosen && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 bg-black/80 text-yellow-300 rounded-md font-bold shrink-0 mr-1">
+                                المختار
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ) : isUnlocked ? (
                   <div className="mt-3 p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-center animate-pulse">

@@ -2,46 +2,18 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 
-// Find spritesheet file in public/ or src/assets/images/
-function findSpritesheet() {
-  const candidates = [
-    'public/card_spritesheet.png',
-    'public/card_spritesheet.jpg',
-    'public/sprite.png',
-    'public/spritesheet.png',
-    'src/assets/images/card_spritesheet.png',
-    'src/assets/images/card_spritesheet.jpg',
-    'src/assets/images/sprite.png',
-    'src/assets/images/spritesheet.png',
-  ];
-
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c;
-  }
-
-  // Search directory for any png or jpg with 'sprite' or 'card' in name
-  const publicFiles = fs.readdirSync('public').filter(f => f.endsWith('.png') || f.endsWith('.jpg'));
-  for (const f of publicFiles) {
-    if (f.includes('sprite') || f.includes('board') || f.includes('card')) {
-      return path.join('public', f);
-    }
-  }
-
-  return null;
-}
-
 async function sliceCards() {
-  const file = findSpritesheet();
-  if (!file) {
-    console.log('No spritesheet file found yet. Please place card_spritesheet.png in public/');
-    return;
+  const file = 'public/card_spritesheet.jpg';
+  
+  if (!fs.existsSync(file)) {
+    throw new Error(`Source image file not found at ${file}`);
   }
 
-  console.log(`Found spritesheet: ${file}`);
+  console.log(`Using source image: ${file}`);
   const metadata = await sharp(file).metadata();
   const W = metadata.width;
   const H = metadata.height;
-  console.log(`Image dimensions: ${W}x${H}`);
+  console.log(`Source image dimensions: ${W}x${H}`);
 
   const outputDir = path.join(process.cwd(), 'public', 'cards');
   if (!fs.existsSync(outputDir)) {
@@ -69,6 +41,7 @@ async function sliceCards() {
       
       await sharp(file)
         .extract({ left, top, width: wCardW, height: wCardH })
+        .png({ quality: 90 })
         .toFile(outPath);
       wCount++;
     }
@@ -96,6 +69,7 @@ async function sliceCards() {
 
       await sharp(file)
         .extract({ left, top, width: eCardW, height: eCardH })
+        .png({ quality: 90 })
         .toFile(outPath);
       eCount++;
     }
@@ -103,4 +77,8 @@ async function sliceCards() {
   console.log(`Successfully sliced ${eCount - 1} evidence cards to public/cards/`);
 }
 
-sliceCards().catch(console.error);
+sliceCards().catch(err => {
+  console.error('Error slicing cards:', err);
+  process.exit(1);
+});
+

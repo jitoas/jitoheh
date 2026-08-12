@@ -166,8 +166,8 @@ export const MedicalExaminerInterface: React.FC<MedicalExaminerInterfaceProps> =
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-zinc-400 font-mono">الحالة:</span>
                   {confirmedClue ? (
-                    <span className="text-xs font-bold text-yellow-300 bg-yellow-400/20 px-2 py-0.5 rounded border border-yellow-400/40 uppercase">
-                      {confirmedClue.clueTag}
+                    <span className="text-xs font-extrabold text-black bg-yellow-400 px-2 py-0.5 rounded border border-yellow-300 uppercase shadow-sm">
+                      {confirmedClue.clueTag} (مكشوف)
                     </span>
                   ) : draftClue ? (
                     <span className="text-xs font-semibold text-amber-400 italic">
